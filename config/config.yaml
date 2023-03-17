@@ -1,0 +1,23 @@
+storage:
+  levelDBPath: storage/db
+  mysqlAddr: 172.0.0.1:3306
+  mysqlPort: 3306
+  mongoDBAddr: 172.0.0.1:3306
+  mongoDBPort: 3345
+network:
+  httpAddr: 127.0.0.1
+  httpPort: 1112
+  grpcAddr: 127.0.0.1
+  grpcPort: 1111
+  socketPath: ./sockets/socket.sock
+logger:
+  level: debug
+  // 编码格式: json,console
+  encoding: console
+  writeConsole: true
+
+  filename: logs/kamier.log
+  maxsize: 10
+  maxBackUps: 10
+  maxAge: 10
+  compress: true

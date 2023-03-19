@@ -1,3 +1,13 @@
 - 日志库: 
-- [zap](https://pkg.go.dev/go.uber.org/zap)
-- [lumberjack](https://github.com/natefinch/lumberjack)
+  - [zap](https://pkg.go.dev/go.uber.org/zap)
+  - [lumberjack](https://github.com/natefinch/lumberjack)
+- 配置库
+  - [viper](https://github.com/spf13/viper)
+  - [fsnotify](https://github.com/fsnotify/fsnotify)
+- http框架
+  - [hertz](https://www.cloudwego.io/zh/docs/hertz/)
+- rpc框架
+  - [grpc](http://doc.oschina.net/grpc)
+- 数据库
+  - [leveldb](https://github.com/google/leveldb)
+    

@@ -20,11 +20,18 @@ func getLogWriter() zapcore.WriteSyncer {
 	return zapcore.AddSync(lumberJackLogger)
 }
 
-func getEncoder() zapcore.Encoder {
+func fileEncoder() zapcore.Encoder {
 	ec := zap.NewProductionEncoderConfig()
 	// 时间格式
+	//ec.EncodeTime = zapcore.TimeEncoderOfLayout(time.DateTime)
+	ec.EncodeTime = cEncodeTime
+	ec.EncodeLevel = zapcore.LowercaseLevelEncoder
+	return zapcore.NewConsoleEncoder(ec)
+}
+
+func stdEncoder() zapcore.Encoder {
+	ec := zap.NewProductionEncoderConfig()
 	ec.EncodeTime = zapcore.TimeEncoderOfLayout(time.DateTime)
-	ec.EncodeLevel = zapcore.CapitalLevelEncoder
 	ec.EncodeLevel = zapcore.LowercaseColorLevelEncoder
 	return zapcore.NewConsoleEncoder(ec)
 }
@@ -33,7 +40,6 @@ var Zlog *zap.Logger
 
 const (
 	DebugLevel = "debug"
-	// InfoLevel default level
 	InfoLevel  = "info"
 	ErrorLevel = "error"
 	WarnLevel  = "warn"
@@ -59,10 +65,16 @@ func InitLogger() {
 	zap.LevelEnablerFunc(func(level zapcore.Level) bool {
 		return level >= zap.DebugLevel
 	})(level)
-	encoder := getEncoder()
+	fe := fileEncoder()
+	std := stdEncoder()
 	core := zapcore.NewTee(
-		zapcore.NewCore(encoder, zapcore.AddSync(os.Stdout), level),
-		zapcore.NewCore(encoder, getLogWriter(), level),
+		zapcore.NewCore(std, zapcore.AddSync(os.Stdout), level),
+		zapcore.NewCore(fe, getLogWriter(), level),
 	)
 	Zlog = zap.New(core, zap.AddCaller())
+}
+
+// cEncodeTime 自定义时间格式显示
+func cEncodeTime(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
+	enc.AppendString("[" + t.Format(time.DateTime) + "]")
 }

@@ -5,8 +5,15 @@ import (
 	"github.com/762610973/kamier/log"
 )
 
-func main() {
+func init() {
 	config.InitConfig()
 	log.InitLogger()
-	log.Zlog.Info("testInfo")
+
+}
+
+func main() {
+	log.Zlog.Info("test color")
+	log.Zlog.Error("test color")
+	log.Zlog.Warn("test color")
+	log.Zlog.Debug("test debug")
 }

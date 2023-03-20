@@ -36,7 +36,7 @@ func stdEncoder() zapcore.Encoder {
 	return zapcore.NewConsoleEncoder(ec)
 }
 
-var Zlog *zap.Logger
+var log *zap.Logger
 
 const (
 	DebugLevel = "debug"
@@ -71,10 +71,23 @@ func InitLogger() {
 		zapcore.NewCore(std, zapcore.AddSync(os.Stdout), level),
 		zapcore.NewCore(fe, getLogWriter(), level),
 	)
-	Zlog = zap.New(core, zap.AddCaller())
+	log = zap.New(core, zap.AddCaller())
 }
 
 // cEncodeTime 自定义时间格式显示
 func cEncodeTime(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
 	enc.AppendString("[" + t.Format(time.DateTime) + "]")
+}
+
+func Debug(message string, fields ...zapcore.Field) {
+	log.Debug(message, fields...)
+}
+func Info(message string, fields ...zapcore.Field) {
+	log.Info(message, fields...)
+}
+func Error(message string, fields ...zapcore.Field) {
+	log.Error(message, fields...)
+}
+func Warn(message string, fields ...zapcore.Field) {
+	log.Warn(message, fields...)
 }

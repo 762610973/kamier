@@ -12,8 +12,5 @@ func init() {
 }
 
 func main() {
-	log.Zlog.Info("test color")
-	log.Zlog.Error("test color")
-	log.Zlog.Warn("test color")
-	log.Zlog.Debug("test debug")
+
 }

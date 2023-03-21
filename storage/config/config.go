@@ -1,9 +1,9 @@
 package config
 
 import (
+	"fmt"
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
-	"log"
 )
 
 // Logger 日志级别,编码格式,日志输出位置的配置
@@ -28,17 +28,9 @@ type Logger struct {
 type NetWork struct {
 	HttpAddr string `yaml:"httpAddr"`
 	HttpPort string `yaml:"httpPort"`
-
-	GrpcAddr string `yaml:"grpcAddr"`
-	GrpcPort string `yaml:"grpcPort"`
-
-	SocketPath string `yaml:"socketPath"`
 }
 
 type Storage struct {
-	LevelDBPath string `yaml:"levelDBPath"`
-	MysqlAddr   string `yaml:"mysqlAddr"`
-	MysqlPort   string `yaml:"mysqlPort"`
 	MongoDBAddr string `yaml:"mongoDBAddr"`
 	MongoDBPort string `yaml:"mongoDBPort"`
 }
@@ -56,7 +48,7 @@ func InitConfig() {
 	viper.SetConfigType("yaml")
 
 	viper.AddConfigPath("./config/")
-	viper.AddConfigPath("./compute/config/")
+	viper.AddConfigPath("./storage/config/")
 	viper.AddConfigPath("../config/")
 	err := viper.ReadInConfig()
 	if err != nil {
@@ -64,7 +56,7 @@ func InitConfig() {
 	}
 	viper.WatchConfig()
 	viper.OnConfigChange(func(e fsnotify.Event) {
-		log.Println("配置文件发生改变", e.Name)
+		fmt.Println("配置文件发生改变", e.Name)
 	})
 	//var cfg CoreConfig
 	err = viper.Unmarshal(&Cfg)

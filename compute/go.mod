@@ -1,4 +1,4 @@
-module github.com/762610973/kamier
+module compute
 
 go 1.20
 

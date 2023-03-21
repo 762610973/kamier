@@ -16,7 +16,7 @@ logger:
   encoding: console
   writeConsole: true
 
-  filename: logs/kamier.log
+  filename: logs/compute/kamier.log
   maxsize: 10
   maxBackUps: 10
   maxAge: 10

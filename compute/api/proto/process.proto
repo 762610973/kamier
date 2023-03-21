@@ -1,1 +1,50 @@
 //! 定义容器内外grpc通信的接口
+syntax = "proto3";
+
+package process;
+
+option go_package = "../process;process";
+
+message PrepareReq {
+  string orgName = 1;
+  int64 serial = 2;
+}
+
+message PrepareRes {}
+
+message FetchReq{}
+message FetchRes{}
+// watch 公开值请求结构体
+message WatchValueReq{
+  string orgName = 1;
+  int64 serial = 2;
+  // 目标节点号
+  int64 targetSite = 3;
+}
+message WatchValueRes{
+  bytes value = 1;
+}
+message AppendCompleteReq {
+}
+
+message AppendCompleteRes {
+}
+message WatchCompleteReq{}
+message WatchCompleteRes{}
+
+message AppendValueReq{}
+message AppendValueRes{}
+service ControllerService {
+  // 准备值
+  rpc Prepare(PrepareReq) returns (PrepareRes);
+  // 获取值
+  rpc Fetch(FetchReq) returns (FetchRes);
+  // 添加完成标记
+  rpc AppendComplete(AppendCompleteReq) returns (AppendCompleteRes);
+  // watch完成标记
+  rpc WatchComplete(WatchValueReq) returns (WatchValueRes);
+  // append公开值
+  rpc AppendValue(AppendValueReq) returns (AppendCompleteRes);
+  // watch公开值
+  rpc WatchValue(WatchValueReq) returns (WatchValueRes);
+}

@@ -1,3 +1,26 @@
 //! 定义节点间grpc通信的接口
+syntax = "proto3";
 
+package compute;
+option go_package = "../compute;compute";
+
+message IpcReq{
+  string orgName = 1;
+  int64 serial = 2;
+  bytes arg = 3;
+}
+
+message IpcRes {
+  bytes res = 1;
+}
+
+message StartReq {
+  string orgName = 1;
+  int64 serial = 2;
+}
+
+message StartRes {
+  string orgName = 1;
+  int64 serial = 2;
+}
 

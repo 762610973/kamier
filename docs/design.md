@@ -25,6 +25,12 @@
   - 查询所有数据: `GET /data/getAllData`
   - 删除公共数据: `DELETE /function/delete/id?id=`
   - 更新公共数据: `PUT /function/update/id?id=`
+  - =============================
+  - 注册节点: `POST /node/add`
+  - 查询节点: `GET /node/get/id?id=`
+  - 查询所有节点: `GET /node/getAllNode`
+  - 删除节点: `DELETE /node/delete/id?id=`
+  - 更新节点: `POST /node/update/id?id=`
 ## compute
 > 分布式的计算服务
 - 接口

@@ -1,22 +1,48 @@
 package model
 
+import (
+	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/cloudwego/hertz/pkg/protocol/consts"
+)
+
 type Function struct {
-	*MetaData
-	Description string
-	Content     string
+	Name        string `bson:"name" json:"name"`
+	Id          int64  `bson:"_id" json:"id"`
+	Description string `bson:"description" json:"description"`
+	Content     string `bson:"content" json:"content"`
 }
 
 type Data struct {
-	*MetaData
-	Content string
+	Name    string `bson:"name" json:"name"`
+	Id      int64  `bson:"_id" json:"id"`
+	Content string `bson:"content" json:"content"`
 }
 
 type Node struct {
-	*MetaData
-	Addr string
+	Name string `bson:"name" json:"name"`
+	Id   int64  `bson:"_id" json:"id"`
+	Addr string `bson:"addr" json:"addr"`
 }
 
-type MetaData struct {
-	Name string
-	Id   int64
+type Response struct {
+	Data any    `json:"data,omitempty"`
+	Msg  string `json:"msg,omitempty"`
+}
+
+const (
+	Err     = "Failed"
+	Success = "Success"
+)
+
+func ErrResponse(c *app.RequestContext, err error) {
+	c.JSON(consts.StatusOK, Response{
+		Data: err,
+		Msg:  Err,
+	})
+}
+func SuccessResponse(c *app.RequestContext, data ...any) {
+	c.JSON(consts.StatusOK, Response{
+		Data: data,
+		Msg:  Success,
+	})
 }

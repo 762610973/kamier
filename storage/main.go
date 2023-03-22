@@ -1,7 +1,15 @@
 package main
 
 import (
+	"context"
+	"fmt"
+	"github.com/cloudwego/hertz/pkg/app/middlewares/server/recovery"
+	"github.com/cloudwego/hertz/pkg/app/server"
+	"github.com/cloudwego/hertz/pkg/common/config"
+	"os"
+	"os/signal"
 	cfg "storage/config"
+	ctl "storage/controller"
 	"storage/db"
 	"storage/log"
 )
@@ -13,8 +21,17 @@ func init() {
 }
 
 func main() {
-	db.InsertData()
-	/*h := server.New(config.Option{F: func(c *config.Options) {
+	/*err := db.InsertData(db.Function, model.Function{
+		Name:        "function1",
+		Id:          10,
+		Description: "测试插入函数",
+		Content:     "测试",
+	})
+	if err != nil {
+		fmt.Println(err)
+		return
+	}*/
+	h := server.New(config.Option{F: func(c *config.Options) {
 		c.Addr = fmt.Sprintf(":%s", cfg.Cfg.NetWork.HttpPort)
 		c.Network = "tcp"
 	}})
@@ -51,5 +68,5 @@ func main() {
 		signal.Notify(quit, os.Interrupt)
 		<-quit
 		_ = h.Shutdown(context.Background())
-	}()*/
+	}()
 }

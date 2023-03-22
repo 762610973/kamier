@@ -10,6 +10,7 @@ import (
 	"go.uber.org/zap"
 	cfg "storage/config"
 	zlog "storage/log"
+	"storage/model"
 	"time"
 )
 
@@ -20,6 +21,12 @@ var (
 	data   = &mongo.Collection{}
 	node   = &mongo.Collection{}
 	ctx    = context.Background()
+)
+
+const (
+	Function = "function"
+	Data     = "data"
+	Node     = "node"
 )
 
 func InitMongoDB() {
@@ -55,13 +62,47 @@ func InitMongoDB() {
 	}
 
 	db = client.Database(cfg.Cfg.Storage.DBName)
-	fn = db.Collection("function")
-	data = db.Collection("data")
-	node = db.Collection("node")
+	fn = db.Collection(Function)
+	data = db.Collection(Data)
+	node = db.Collection(Node)
 }
 
-func InsertData(types string, value any) {
-
+func InsertData(types string, value any) error {
+	var err error
+	switch types {
+	case Function:
+		_, err = fn.InsertOne(ctx, value, nil)
+	case Data:
+		_, err = data.InsertOne(ctx, value, nil)
+	case Node:
+		_, err = node.InsertOne(ctx, value, nil)
+	}
+	if err != nil {
+		zlog.Error(fmt.Sprintf("insert %s failed", types), zap.Error(err))
+		return err
+	}
+	zlog.Debug(fmt.Sprintf("insert %s success", types), zap.Any("value", value))
+	return nil
+}
+func GetData(types string, filter any) (error, any) {
+	var err error
+	var res any
+	switch types {
+	case Function:
+		var f model.Function
+		err = fn.FindOne(ctx, filter).Decode(&f)
+	case Data:
+		var d model.Data
+		err = data.FindOne(ctx, filter).Decode(d)
+	case Node:
+		var n model.Node
+		err = node.FindOne(ctx, filter).Decode(n)
+	}
+	if err != nil {
+		zlog.Error(fmt.Sprintf("insert %s failed", types), zap.Error(err))
+		return err, nil
+	}
+	return nil, res
 }
 func checkDBExist() bool {
 	ctx := context.Background()

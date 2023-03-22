@@ -1,6 +1,10 @@
 storage:
-  mongoDBAddr: 172.0.0.1:3306
-  mongoDBPort: 3345
+  mongoDBAddr: 127.0.0.1
+  mongoDBPort: 27017
+  dbName: storage
+  delete: true
+  username: xl
+  password: 1112
 network:
   httpAddr: 127.0.0.1
   httpPort: 1112
@@ -10,7 +14,7 @@ logger:
   encoding: console
   writeConsole: true
 
-  filename: logs/compute/kamier.log
+  filename: ../logs/storage/storage.log
   maxsize: 10
   maxBackUps: 10
   maxAge: 10

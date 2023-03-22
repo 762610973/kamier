@@ -33,6 +33,11 @@ type NetWork struct {
 type Storage struct {
 	MongoDBAddr string `yaml:"mongoDBAddr"`
 	MongoDBPort string `yaml:"mongoDBPort"`
+	DBName      string `yaml:"dbName"`
+	// 数据库模式,true: 每次启动删除数据库,false: 不删除数据库
+	Delete   bool   `yaml:"delete"`
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
 }
 
 type config struct {

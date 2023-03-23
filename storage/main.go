@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"github.com/cloudwego/hertz/pkg/common/config"
+	"go.uber.org/zap"
 	"os"
 	"os/signal"
 	cfg "storage/config"
@@ -48,7 +49,11 @@ func main() {
 	h.POST("/node/update/", ctl.UpdateNode)
 	h.GET("/node/getAllNode", ctl.GetAllNode)
 	go func() {
-		_ = h.Run()
+		err := h.Run()
+		if err != nil {
+			zlog.Error("start http server failed", zap.Error(err))
+			os.Exit(1)
+		}
 	}()
 	signalCh := make(chan os.Signal, 1)
 	signal.Notify(signalCh, os.Interrupt, os.Kill)
@@ -62,7 +67,6 @@ func main() {
 		if err != nil {
 			return
 		}
-		//case errCh:
 	}
 	zlog.Info("graceful shutdown...http server shutdown")
 }

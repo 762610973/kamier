@@ -6,11 +6,11 @@ import (
 	zlog "compute/log"
 	"compute/server/controller"
 	"context"
-	"fmt"
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"go.uber.org/zap"
 	"os"
 	"os/signal"
+	"time"
 )
 
 func init() {
@@ -22,17 +22,25 @@ func main() {
 	var err error
 	c := core.NewCore()
 	var h *server.Hertz
-	err = controller.RunHttpServer(c, h)
-	if err != nil {
-		zlog.Error("run http server failed", zap.Error(err))
-		return
-	}
 	go func() {
-		quit := make(chan os.Signal, 1)
-		signal.Notify(quit, os.Interrupt)
-		status := <-quit
-		fmt.Println("status: ", status)
-		zlog.Info("shutdown all server")
-		_ = h.Shutdown(context.Background())
+		err = controller.RunHttpServer(c, h)
+		if err != nil {
+			zlog.Error("start http server failed", zap.Error(err))
+			os.Exit(1)
+		}
 	}()
+
+	signalCh := make(chan os.Signal, 1)
+	signal.Notify(signalCh, os.Interrupt, os.Kill)
+	select {
+	case <-signalCh:
+		//优雅退出
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		err := h.Shutdown(ctx)
+		zlog.Info("graceful shutdown...")
+		if err != nil {
+			return
+		}
+	}
 }

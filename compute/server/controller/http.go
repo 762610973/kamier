@@ -6,7 +6,6 @@ import (
 	zlog "compute/log"
 	"compute/model"
 	"context"
-	"fmt"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/middlewares/server/recovery"
 	"github.com/cloudwego/hertz/pkg/app/server"
@@ -34,8 +33,6 @@ func RunHttpServer(core *core.Core, h *server.Hertz) error {
 		zlog.Error("start http server failed", zap.Error(err))
 		return err
 	}
-	fmt.Println("eqrqwerqwe")
-
 	return nil
 }
 

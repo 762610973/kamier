@@ -26,7 +26,6 @@ type Logger struct {
 }
 
 type NetWork struct {
-	HttpAddr string `yaml:"httpAddr"`
 	HttpPort string `yaml:"httpPort"`
 
 	GrpcAddr string `yaml:"grpcAddr"`
@@ -39,8 +38,6 @@ type Storage struct {
 	LevelDBPath string `yaml:"levelDBPath"`
 	MysqlAddr   string `yaml:"mysqlAddr"`
 	MysqlPort   string `yaml:"mysqlPort"`
-	MongoDBAddr string `yaml:"mongoDBAddr"`
-	MongoDBPort string `yaml:"mongoDBPort"`
 }
 
 type config struct {

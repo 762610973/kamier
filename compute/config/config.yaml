@@ -1,14 +1,11 @@
 storage:
   levelDBPath: storage/db
-  mysqlAddr: 172.0.0.1:3306
+  mysqlAddr: 127.0.0.1:3306
   mysqlPort: 3306
-  mongoDBAddr: 172.0.0.1:3306
-  mongoDBPort: 3345
 network:
-  httpAddr: 127.0.0.1
-  httpPort: 1112
+  httpPort: 1113
   grpcAddr: 127.0.0.1
-  grpcPort: 1111
+  grpcPort: 1114
   socketPath: ./sockets/socket.sock
 logger:
   level: debug
@@ -16,7 +13,7 @@ logger:
   encoding: console
   writeConsole: true
 
-  filename: logs/compute/kamier.log
+  filename: ../logs/compute/compute.log
   maxsize: 10
   maxBackUps: 10
   maxAge: 10

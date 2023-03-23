@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/cloudwego/hertz/pkg/app/middlewares/server/recovery"
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"github.com/cloudwego/hertz/pkg/common/config"
 	"os"
@@ -11,20 +10,21 @@ import (
 	cfg "storage/config"
 	ctl "storage/controller"
 	"storage/db"
-	"storage/log"
+	zlog "storage/log"
+	"time"
 )
 
 func init() {
 	cfg.InitConfig()
-	log.InitLogger()
+	zlog.InitLogger()
 	db.InitMongoDB()
 }
 func main() {
-	h := server.New(config.Option{F: func(c *config.Options) {
+	h := server.Default(config.Option{F: func(c *config.Options) {
 		c.Addr = fmt.Sprintf(":%s", cfg.Cfg.NetWork.HttpPort)
 		c.Network = "tcp"
+		c.DisablePrintRoute = true
 	}})
-	h.Use(recovery.Recovery())
 	h.GET("/ping", ctl.Ping)
 	// 公共函数
 
@@ -47,15 +47,22 @@ func main() {
 	h.DELETE("/node/delete/", ctl.DeleteNode)
 	h.POST("/node/update/", ctl.UpdateNode)
 	h.GET("/node/getAllNode", ctl.GetAllNode)
-
-	err := h.Run()
-	if err != nil {
-		return
-	}
 	go func() {
-		quit := make(chan os.Signal, 1)
-		signal.Notify(quit, os.Interrupt)
-		<-quit
-		_ = h.Shutdown(context.Background())
+		_ = h.Run()
 	}()
+	signalCh := make(chan os.Signal, 1)
+	signal.Notify(signalCh, os.Interrupt, os.Kill)
+	select {
+	case <-signalCh:
+		//优雅退出
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		err := h.Shutdown(ctx)
+		zlog.Info("graceful shutdown...")
+		if err != nil {
+			return
+		}
+		//case errCh:
+	}
+	zlog.Info("graceful shutdown...http server shutdown")
 }

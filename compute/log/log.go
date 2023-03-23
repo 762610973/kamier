@@ -1,6 +1,7 @@
 package log
 
 import (
+	cfg "compute/config"
 	"github.com/natefinch/lumberjack"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -11,15 +12,14 @@ import (
 
 func getLogWriter() zapcore.WriteSyncer {
 	lumberJackLogger := &lumberjack.Logger{
-		Filename:   "logs/test.log",
-		MaxSize:    10,
-		MaxBackups: 5,
-		MaxAge:     30,
-		Compress:   false,
+		Filename:   cfg.Cfg.Logger.FileName,
+		MaxSize:    cfg.Cfg.Logger.MaxSize,
+		MaxBackups: cfg.Cfg.Logger.MaxBackUps,
+		MaxAge:     cfg.Cfg.Logger.MaxAge,
+		Compress:   cfg.Cfg.Logger.Compress,
 	}
 	return zapcore.AddSync(lumberJackLogger)
 }
-
 func fileEncoder() zapcore.Encoder {
 	ec := zap.NewProductionEncoderConfig()
 	// 时间格式
@@ -41,8 +41,8 @@ var log *zap.Logger
 const (
 	DebugLevel = "debug"
 	InfoLevel  = "info"
-	ErrorLevel = "error"
 	WarnLevel  = "warn"
+	ErrorLevel = "error"
 )
 
 func getLevel(level string) zapcore.Level {
@@ -61,7 +61,7 @@ func getLevel(level string) zapcore.Level {
 }
 
 func InitLogger() {
-	level := getLevel("info")
+	level := getLevel(cfg.Cfg.Logger.Level)
 	zap.LevelEnablerFunc(func(level zapcore.Level) bool {
 		return level >= zap.DebugLevel
 	})(level)
@@ -85,9 +85,14 @@ func Debug(message string, fields ...zapcore.Field) {
 func Info(message string, fields ...zapcore.Field) {
 	log.Info(message, fields...)
 }
+func Warn(message string, fields ...zapcore.Field) {
+	log.Warn(message, fields...)
+}
+
 func Error(message string, fields ...zapcore.Field) {
 	log.Error(message, fields...)
 }
-func Warn(message string, fields ...zapcore.Field) {
-	log.Warn(message, fields...)
+
+func Panic(message string, fields ...zapcore.Field) {
+	log.Panic(message, fields...)
 }

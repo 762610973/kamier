@@ -13,7 +13,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func GetFunc(ctx context.Context, c *app.RequestContext) {
+func GetFunc(_ context.Context, c *app.RequestContext) {
 	id := c.Query("id")
 	err, data := db.FindDocument(db.Function, bson.M{"_id": id})
 	if err != nil {
@@ -24,7 +24,7 @@ func GetFunc(ctx context.Context, c *app.RequestContext) {
 	}
 }
 
-func GetAllFunc(ctx context.Context, c *app.RequestContext) {
+func GetAllFunc(_ context.Context, c *app.RequestContext) {
 	err, res := db.FindAllDocument(db.Function)
 	if err != nil {
 		model.ErrResponse(c, err)
@@ -34,7 +34,7 @@ func GetAllFunc(ctx context.Context, c *app.RequestContext) {
 	}
 }
 
-func AddFunc(ctx context.Context, c *app.RequestContext) {
+func AddFunc(_ context.Context, c *app.RequestContext) {
 	var f model.Function
 	err := c.Bind(&f)
 	if err != nil {
@@ -47,7 +47,7 @@ func AddFunc(ctx context.Context, c *app.RequestContext) {
 	}
 	model.SuccessResponse(c, nil)
 }
-func DeleteFunc(ctx context.Context, c *app.RequestContext) {
+func DeleteFunc(_ context.Context, c *app.RequestContext) {
 	id := c.Query("id")
 	err := db.DeleteDocument(db.Function, bson.M{"_id": id})
 	if err != nil {
@@ -58,7 +58,7 @@ func DeleteFunc(ctx context.Context, c *app.RequestContext) {
 	}
 }
 
-func UpdateFunc(ctx context.Context, c *app.RequestContext) {
+func UpdateFunc(_ context.Context, c *app.RequestContext) {
 	var f model.Function
 	err := c.Bind(&f)
 	if err != nil {

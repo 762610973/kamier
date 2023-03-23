@@ -12,11 +12,11 @@ import (
 	"storage/model"
 )
 
-func Ping(ctx context.Context, c *app.RequestContext) {
+func Ping(_ context.Context, c *app.RequestContext) {
 	c.String(consts.StatusOK, "OK")
 }
 
-func RegisterNode(ctx context.Context, c *app.RequestContext) {
+func RegisterNode(_ context.Context, c *app.RequestContext) {
 	var n model.Node
 	err := c.Bind(&n)
 	if err != nil {
@@ -29,7 +29,7 @@ func RegisterNode(ctx context.Context, c *app.RequestContext) {
 	}
 	model.SuccessResponse(c, nil)
 }
-func GetNode(ctx context.Context, c *app.RequestContext) {
+func GetNode(_ context.Context, c *app.RequestContext) {
 	id := c.Query("id")
 	err, data := db.FindDocument(db.Node, bson.M{"_id": id})
 	if err != nil {
@@ -39,7 +39,7 @@ func GetNode(ctx context.Context, c *app.RequestContext) {
 		model.SuccessResponse(c, data)
 	}
 }
-func DeleteNode(ctx context.Context, c *app.RequestContext) {
+func DeleteNode(_ context.Context, c *app.RequestContext) {
 	id := c.Query("id")
 	err := db.DeleteDocument(db.Node, bson.M{"_id": id})
 	if err != nil {
@@ -49,7 +49,7 @@ func DeleteNode(ctx context.Context, c *app.RequestContext) {
 		model.SuccessResponse(c, nil)
 	}
 }
-func UpdateNode(ctx context.Context, c *app.RequestContext) {
+func UpdateNode(_ context.Context, c *app.RequestContext) {
 	var f model.Node
 	err := c.Bind(&f)
 	if err != nil {
@@ -65,7 +65,7 @@ func UpdateNode(ctx context.Context, c *app.RequestContext) {
 		}
 	}
 }
-func GetAllNode(ctx context.Context, c *app.RequestContext) {
+func GetAllNode(_ context.Context, c *app.RequestContext) {
 	err, res := db.FindAllDocument(db.Node)
 	if err != nil {
 		model.ErrResponse(c, err)

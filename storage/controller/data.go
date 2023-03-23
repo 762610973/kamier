@@ -13,7 +13,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func AddData(ctx context.Context, c *app.RequestContext) {
+func AddData(_ context.Context, c *app.RequestContext) {
 	var d model.Data
 	err := c.Bind(&d)
 	if err != nil {
@@ -27,7 +27,7 @@ func AddData(ctx context.Context, c *app.RequestContext) {
 		model.SuccessResponse(c, nil)
 	}
 }
-func GetData(ctx context.Context, c *app.RequestContext) {
+func GetData(_ context.Context, c *app.RequestContext) {
 	id := c.Query("id")
 	err, data := db.FindDocument(db.Data, bson.M{"_id": id})
 	if err != nil {
@@ -38,7 +38,7 @@ func GetData(ctx context.Context, c *app.RequestContext) {
 	}
 }
 
-func GetAllData(ctx context.Context, c *app.RequestContext) {
+func GetAllData(_ context.Context, c *app.RequestContext) {
 	err, res := db.FindAllDocument(db.Data)
 	if err != nil {
 		model.ErrResponse(c, err)
@@ -47,7 +47,7 @@ func GetAllData(ctx context.Context, c *app.RequestContext) {
 		model.SuccessResponse(c, res)
 	}
 }
-func DeleteData(ctx context.Context, c *app.RequestContext) {
+func DeleteData(_ context.Context, c *app.RequestContext) {
 	id := c.Query("id")
 	err := db.DeleteDocument(db.Data, bson.M{"_id": id})
 	if err != nil {
@@ -57,7 +57,7 @@ func DeleteData(ctx context.Context, c *app.RequestContext) {
 		model.SuccessResponse(c, nil)
 	}
 }
-func UpdateData(ctx context.Context, c *app.RequestContext) {
+func UpdateData(_ context.Context, c *app.RequestContext) {
 	var f model.Data
 	err := c.Bind(&f)
 	if err != nil {

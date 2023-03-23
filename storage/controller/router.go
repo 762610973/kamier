@@ -18,7 +18,7 @@ func Ping(ctx context.Context, c *app.RequestContext) {
 
 func GetFunc(ctx context.Context, c *app.RequestContext) {
 	id := c.Query("id")
-	err, data := db.GetData(db.Function, bson.M{"_id": id})
+	err, data := db.FindDocument(db.Function, bson.M{"_id": id})
 	if err != nil {
 		model.ErrResponse(c, err)
 	} else {
@@ -28,7 +28,13 @@ func GetFunc(ctx context.Context, c *app.RequestContext) {
 }
 
 func GetAllFunc(ctx context.Context, c *app.RequestContext) {
-
+	err, res := db.FindAllDocument(db.Function)
+	if err != nil {
+		model.ErrResponse(c, err)
+	} else {
+		zlog.Debug("Get All Func success")
+		model.SuccessResponse(c, res)
+	}
 }
 
 func AddFunc(ctx context.Context, c *app.RequestContext) {
@@ -38,11 +44,11 @@ func AddFunc(ctx context.Context, c *app.RequestContext) {
 		zlog.Error("AddFunc bind object failed", zap.Error(err))
 		model.ErrResponse(c, err)
 	}
-	err = db.InsertData(db.Function, f)
+	err = db.InsertDocument(db.Function, f)
 	if err != nil {
 		model.ErrResponse(c, err)
 	}
-	model.SuccessResponse(c)
+	model.SuccessResponse(c, nil)
 }
 func DeleteFunc(ctx context.Context, c *app.RequestContext) {
 
@@ -59,16 +65,16 @@ func AddData(ctx context.Context, c *app.RequestContext) {
 		zlog.Error("AddData bind object failed", zap.Error(err))
 		model.ErrResponse(c, err)
 	}
-	err = db.InsertData(db.Data, d)
+	err = db.InsertDocument(db.Data, d)
 	if err != nil {
 		model.ErrResponse(c, err)
 	} else {
-		model.SuccessResponse(c)
+		model.SuccessResponse(c, nil)
 	}
 }
 func GetData(ctx context.Context, c *app.RequestContext) {
 	id := c.Query("id")
-	err, data := db.GetData(db.Data, bson.M{"_id": id})
+	err, data := db.FindDocument(db.Data, bson.M{"_id": id})
 	if err != nil {
 		model.ErrResponse(c, err)
 	} else {
@@ -78,7 +84,13 @@ func GetData(ctx context.Context, c *app.RequestContext) {
 }
 
 func GetAllData(ctx context.Context, c *app.RequestContext) {
-
+	err, res := db.FindAllDocument(db.Data)
+	if err != nil {
+		model.ErrResponse(c, err)
+	} else {
+		zlog.Debug("Get All Data success")
+		model.SuccessResponse(c, res)
+	}
 }
 func DeleteData(ctx context.Context, c *app.RequestContext) {
 
@@ -94,16 +106,16 @@ func RegisterNode(ctx context.Context, c *app.RequestContext) {
 		zlog.Error("RegisterNode bind object failed", zap.Error(err))
 		model.ErrResponse(c, err)
 	}
-	err = db.InsertData(db.Node, n)
+	err = db.InsertDocument(db.Node, n)
 	if err != nil {
 		model.ErrResponse(c, err)
 	}
-	model.SuccessResponse(c)
+	model.SuccessResponse(c, nil)
 }
 
 func GetNode(ctx context.Context, c *app.RequestContext) {
 	id := c.Query("id")
-	err, data := db.GetData(db.Node, bson.M{"_id": id})
+	err, data := db.FindDocument(db.Node, bson.M{"_id": id})
 	if err != nil {
 		model.ErrResponse(c, err)
 	} else {
@@ -118,5 +130,11 @@ func UpdateNode(ctx context.Context, c *app.RequestContext) {
 
 }
 func GetAllNode(ctx context.Context, c *app.RequestContext) {
-
+	err, res := db.FindAllDocument(db.Node)
+	if err != nil {
+		model.ErrResponse(c, err)
+	} else {
+		zlog.Debug("Get All Node success")
+		model.SuccessResponse(c, res)
+	}
 }

@@ -19,18 +19,7 @@ func init() {
 	log.InitLogger()
 	db.InitMongoDB()
 }
-
 func main() {
-	/*err := db.InsertData(db.Function, model.Function{
-		Name:        "function1",
-		Id:          10,
-		Description: "测试插入函数",
-		Content:     "测试",
-	})
-	if err != nil {
-		fmt.Println(err)
-		return
-	}*/
 	h := server.New(config.Option{F: func(c *config.Options) {
 		c.Addr = fmt.Sprintf(":%s", cfg.Cfg.NetWork.HttpPort)
 		c.Network = "tcp"

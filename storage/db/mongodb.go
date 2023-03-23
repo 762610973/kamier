@@ -10,7 +10,6 @@ import (
 	"go.uber.org/zap"
 	cfg "storage/config"
 	zlog "storage/log"
-	"storage/model"
 	"time"
 )
 
@@ -60,22 +59,22 @@ func InitMongoDB() {
 			zlog.Info("delete database: " + cfg.Cfg.Storage.DBName)
 		}
 	}
-
+	// init database and collection
 	db = client.Database(cfg.Cfg.Storage.DBName)
 	fn = db.Collection(Function)
 	data = db.Collection(Data)
 	node = db.Collection(Node)
 }
 
-func InsertData(types string, value any) error {
+func InsertDocument(types string, value any) error {
 	var err error
 	switch types {
 	case Function:
-		_, err = fn.InsertOne(ctx, value, nil)
+		_, err = fn.InsertOne(ctx, value)
 	case Data:
-		_, err = data.InsertOne(ctx, value, nil)
+		_, err = data.InsertOne(ctx, value)
 	case Node:
-		_, err = node.InsertOne(ctx, value, nil)
+		_, err = node.InsertOne(ctx, value)
 	}
 	if err != nil {
 		zlog.Error(fmt.Sprintf("insert %s failed", types), zap.Error(err))
@@ -84,25 +83,41 @@ func InsertData(types string, value any) error {
 	zlog.Debug(fmt.Sprintf("insert %s success", types), zap.Any("value", value))
 	return nil
 }
-func GetData(types string, filter any) (error, any) {
+func FindDocument(types string, filter any) (error, bson.M) {
 	var err error
-	var res any
-	switch types {
-	case Function:
-		var f model.Function
-		err = fn.FindOne(ctx, filter).Decode(&f)
-	case Data:
-		var d model.Data
-		err = data.FindOne(ctx, filter).Decode(d)
-	case Node:
-		var n model.Node
-		err = node.FindOne(ctx, filter).Decode(n)
-	}
+	var res bson.M
+	err = db.Collection(types).FindOne(ctx, filter).Decode(&res)
 	if err != nil {
 		zlog.Error(fmt.Sprintf("insert %s failed", types), zap.Error(err))
 		return err, nil
 	}
 	return nil, res
+}
+func FindAllDocument(types string) (error, []bson.M) {
+	var err error
+	var res []bson.M
+	var cur *mongo.Cursor
+	findOpt := options.Find().SetProjection(bson.D{{"_id", 1}})
+	cur, err = db.Collection(types).Find(ctx, bson.M{}, findOpt)
+	if err != nil {
+		zlog.Error("find collection failed", zap.Error(err))
+		return err, nil
+	}
+	err = cur.All(ctx, &res)
+	if err != nil {
+		zlog.Error(fmt.Sprintf("find all %s failed", types), zap.Error(err))
+		return err, nil
+	}
+	return nil, res
+}
+func DeleteDocument(types string, filter any) error {
+	_, err := db.Collection(types).DeleteOne(ctx, filter)
+	if err != nil {
+		zlog.Error(fmt.Sprintf("%s delete success", types), zap.Error(err))
+		return err
+	}
+	zlog.Debug(fmt.Sprintf("%s delete success", types))
+	return nil
 }
 func checkDBExist() bool {
 	ctx := context.Background()

@@ -40,9 +40,13 @@ func ErrResponse(c *app.RequestContext, err error) {
 		Msg:  Err,
 	})
 }
-func SuccessResponse(c *app.RequestContext, data ...any) {
-	c.JSON(consts.StatusOK, Response{
-		Data: data,
-		Msg:  Success,
-	})
+func SuccessResponse(c *app.RequestContext, data any) {
+	if data == nil {
+		c.JSON(consts.StatusOK, Response{Msg: Success})
+	} else {
+		c.JSON(consts.StatusOK, Response{
+			Data: data,
+			Msg:  Success,
+		})
+	}
 }

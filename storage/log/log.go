@@ -72,7 +72,7 @@ func InitLogger() {
 		zapcore.NewCore(std, zapcore.AddSync(os.Stdout), level),
 		zapcore.NewCore(fe, getLogWriter(), level),
 	)
-	log = zap.New(core, zap.AddCaller())
+	log = zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
 }
 
 // cEncodeTime 自定义时间格式显示

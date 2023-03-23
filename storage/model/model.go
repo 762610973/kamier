@@ -7,20 +7,20 @@ import (
 
 type Function struct {
 	Name        string `bson:"name" json:"name"`
-	Id          int64  `bson:"_id" json:"id"`
+	Id          string `bson:"_id" json:"id"`
 	Description string `bson:"description" json:"description"`
 	Content     string `bson:"content" json:"content"`
 }
 
 type Data struct {
 	Name    string `bson:"name" json:"name"`
-	Id      int64  `bson:"_id" json:"id"`
+	Id      string `bson:"_id" json:"id"`
 	Content string `bson:"content" json:"content"`
 }
 
 type Node struct {
 	Name string `bson:"name" json:"name"`
-	Id   int64  `bson:"_id" json:"id"`
+	Id   string `bson:"_id" json:"id"`
 	Addr string `bson:"addr" json:"addr"`
 }
 
@@ -36,7 +36,7 @@ const (
 
 func ErrResponse(c *app.RequestContext, err error) {
 	c.JSON(consts.StatusOK, Response{
-		Data: err,
+		Data: err.Error(),
 		Msg:  Err,
 	})
 }

@@ -66,6 +66,7 @@ func InitMongoDB() {
 	node = db.Collection(Node)
 }
 
+// InsertDocument 插入文档
 func InsertDocument(types string, value any) error {
 	var err error
 	switch types {
@@ -83,16 +84,20 @@ func InsertDocument(types string, value any) error {
 	zlog.Debug(fmt.Sprintf("insert %s success", types), zap.Any("value", value))
 	return nil
 }
+
+// FindDocument 根据_id查询文档
 func FindDocument(types string, filter any) (error, bson.M) {
 	var err error
 	var res bson.M
 	err = db.Collection(types).FindOne(ctx, filter).Decode(&res)
 	if err != nil {
-		zlog.Error(fmt.Sprintf("insert %s failed", types), zap.Error(err))
+		zlog.Error(fmt.Sprintf("find %s failed", types), zap.Error(err), zap.Any("filter", filter))
 		return err, nil
 	}
 	return nil, res
 }
+
+// FindAllDocument 查询所有文档
 func FindAllDocument(types string) (error, []bson.M) {
 	var err error
 	var res []bson.M
@@ -110,15 +115,29 @@ func FindAllDocument(types string) (error, []bson.M) {
 	}
 	return nil, res
 }
+
+// DeleteDocument 根据_id删除文档
 func DeleteDocument(types string, filter any) error {
 	_, err := db.Collection(types).DeleteOne(ctx, filter)
 	if err != nil {
-		zlog.Error(fmt.Sprintf("%s delete success", types), zap.Error(err))
+		zlog.Error(fmt.Sprintf("%s delete failed", types), zap.Error(err))
 		return err
 	}
 	zlog.Debug(fmt.Sprintf("%s delete success", types))
 	return nil
 }
+
+func UpdateDocument(types string, id, update any) error {
+	_, err := db.Collection(types).UpdateByID(ctx, id, update)
+	if err != nil {
+		zlog.Error(types+" update failed", zap.Error(err))
+		return err
+	}
+	zlog.Debug(types + " update failed")
+	return nil
+}
+
+// 检查数据库是否存在
 func checkDBExist() bool {
 	ctx := context.Background()
 	// 此处filter填写空

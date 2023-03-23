@@ -29,14 +29,14 @@ func main() {
 	// 公共函数
 
 	h.POST("/function/add", ctl.AddFunc)
-	h.GET("/function/get/", ctl.GetFunc)
+	h.GET("/function/get", ctl.GetFunc)
 	h.GET("/function/getAllFunc", ctl.GetAllFunc)
 	h.DELETE("/function/delete/", ctl.DeleteFunc)
 	h.PUT("/function/update/", ctl.UpdateFunc)
 
 	// 公共数据
 	h.POST("/data/add", ctl.AddData)
-	h.GET("/data/get/", ctl.GetData)
+	h.GET("/data/get", ctl.GetData)
 	h.GET("/data/getAllFunc", ctl.GetAllData)
 	h.DELETE("/data/delete/", ctl.DeleteData)
 	h.PUT("/data/update/", ctl.UpdateData)

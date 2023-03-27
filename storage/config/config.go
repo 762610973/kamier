@@ -26,7 +26,7 @@ type Logger struct {
 }
 
 type NetWork struct {
-	HttpAddr string `yaml:"httpAddr"`
+	//HttpAddr string `yaml:"httpAddr"`
 	HttpPort string `yaml:"httpPort"`
 }
 
@@ -41,9 +41,9 @@ type Storage struct {
 }
 
 type config struct {
-	Storage Storage `yaml:"storage"`
-	NetWork NetWork `yaml:"netWork"`
-	Logger  Logger  `yaml:"logger"`
+	Storage `yaml:"storage"`
+	NetWork `yaml:"netWork"`
+	Logger  `yaml:"logger"`
 }
 
 var Cfg config

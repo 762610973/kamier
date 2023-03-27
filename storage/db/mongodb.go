@@ -35,8 +35,8 @@ func InitMongoDB() {
 	client, err = mongo.Connect(ctx1, options.
 		Client().ApplyURI(uri).
 		SetAuth(options.Credential{
-			Username: cfg.Cfg.Storage.Username,
-			Password: cfg.Cfg.Storage.Password,
+			Username: cfg.Cfg.Username,
+			Password: cfg.Cfg.Password,
 		}).
 		SetMaxPoolSize(20))
 	if err != nil {
@@ -48,18 +48,18 @@ func InitMongoDB() {
 	}
 	zlog.Info("connect mongodb success")
 	// start with clean db
-	if cfg.Cfg.Storage.Delete {
+	if cfg.Cfg.Delete {
 		if checkDBExist() {
 			zlog.Info("database exist, then drop it")
-			err = client.Database(cfg.Cfg.Storage.DBName).Drop(ctx)
+			err = client.Database(cfg.Cfg.DBName).Drop(ctx)
 			if err != nil {
 				zlog.Warn("delete database failed", zap.Error(err))
 			}
-			zlog.Info("delete database: " + cfg.Cfg.Storage.DBName)
+			zlog.Info("delete database: " + cfg.Cfg.DBName)
 		}
 	}
 	// init database and collection
-	db = client.Database(cfg.Cfg.Storage.DBName)
+	db = client.Database(cfg.Cfg.DBName)
 }
 
 // InsertDocument 插入文档

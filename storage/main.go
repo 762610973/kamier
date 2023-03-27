@@ -12,6 +12,7 @@ import (
 	ctl "storage/controller"
 	"storage/db"
 	zlog "storage/log"
+	"strings"
 	"time"
 )
 
@@ -22,7 +23,7 @@ func init() {
 }
 func main() {
 	h := server.Default(config.Option{F: func(c *config.Options) {
-		c.Addr = fmt.Sprintf(":%s", cfg.Cfg.NetWork.HttpPort)
+		c.Addr = fmt.Sprintf(":%s", cfg.Cfg.HttpPort)
 		c.Network = "tcp"
 		c.DisablePrintRoute = true
 	}})
@@ -51,8 +52,11 @@ func main() {
 	go func() {
 		err := h.Run()
 		if err != nil {
-			zlog.Error("start http server failed", zap.Error(err))
-			os.Exit(1)
+			if strings.Contains(err.Error(), "use of closed network connection") {
+				zlog.Info("begin graceful shutdown...")
+			} else {
+				zlog.Error("run http server failed", zap.Error(err))
+			}
 		}
 	}()
 	signalCh := make(chan os.Signal, 1)

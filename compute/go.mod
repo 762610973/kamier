@@ -8,6 +8,7 @@ require (
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/spf13/viper v1.15.0
+	github.com/syndtr/goleveldb v1.0.0
 	go.uber.org/zap v1.24.0
 	google.golang.org/grpc v1.52.0
 )
@@ -20,6 +21,7 @@ require (
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
 	github.com/cloudwego/netpoll v0.3.1 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/henrylee2cn/ameda v1.4.10 // indirect
 	github.com/henrylee2cn/goutil v0.0.0-20210127050712-89660552f6f8 // indirect

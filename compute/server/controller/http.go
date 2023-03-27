@@ -12,32 +12,23 @@ import (
 	"github.com/cloudwego/hertz/pkg/common/config"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	"go.uber.org/zap"
-	"google.golang.org/grpc"
 )
 
 type controller struct {
 	*core.Core
 }
 
-func RunHttpServer(core *core.Core, h *server.Hertz) error {
-	h = server.New(config.Option{F: func(o *config.Options) {
+func RunHttpServer(core *core.Core) *server.Hertz {
+	h := server.New(config.Option{F: func(o *config.Options) {
 		o.Addr = ":" + cfg.Cfg.NetWork.HttpPort
+		o.DisablePrintRoute = true
 	}})
 	h.Use(recovery.Recovery())
 	ctl := controller{core}
 	h.POST("/syncCompute", ctl.SyncCompute)
 	h.POST("/asyncCompute")
 	h.POST("/getOutput")
-	err := h.Run()
-	if err != nil {
-		zlog.Error("start http server failed", zap.Error(err))
-		return err
-	}
-	return nil
-}
-
-func RunGrpcProcessServer(core *core.Core) (*grpc.Server, error) {
-	return nil, nil
+	return h
 }
 
 func (ctl *controller) SyncCompute(_ context.Context, c *app.RequestContext) {
@@ -50,5 +41,6 @@ func (ctl *controller) SyncCompute(_ context.Context, c *app.RequestContext) {
 		model.ErrResponse(c, err)
 		return
 	}
+	zlog.Info("sync compute success")
 	c.JSON(consts.StatusOK, "success")
 }

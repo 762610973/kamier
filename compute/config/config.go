@@ -41,9 +41,9 @@ type Storage struct {
 }
 
 type config struct {
-	Storage Storage `yaml:"storage"`
-	NetWork NetWork `yaml:"netWork"`
-	Logger  Logger  `yaml:"logger"`
+	Storage `yaml:"storage"`
+	NetWork `yaml:"netWork"`
+	Logger  `yaml:"logger"`
 }
 
 var Cfg config

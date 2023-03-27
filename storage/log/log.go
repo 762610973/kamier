@@ -12,11 +12,11 @@ import (
 
 func getLogWriter() zapcore.WriteSyncer {
 	lumberJackLogger := &lumberjack.Logger{
-		Filename:   cfg.Cfg.Logger.FileName,
-		MaxSize:    cfg.Cfg.Logger.MaxSize,
-		MaxBackups: cfg.Cfg.Logger.MaxBackUps,
-		MaxAge:     cfg.Cfg.Logger.MaxAge,
-		Compress:   cfg.Cfg.Logger.Compress,
+		Filename:   cfg.Cfg.FileName,
+		MaxSize:    cfg.Cfg.MaxSize,
+		MaxBackups: cfg.Cfg.MaxBackUps,
+		MaxAge:     cfg.Cfg.MaxAge,
+		Compress:   cfg.Cfg.Compress,
 	}
 	return zapcore.AddSync(lumberJackLogger)
 }
@@ -24,17 +24,24 @@ func getLogWriter() zapcore.WriteSyncer {
 func fileEncoder() zapcore.Encoder {
 	ec := zap.NewProductionEncoderConfig()
 	// 时间格式
-	//ec.EncodeTime = zapcore.TimeEncoderOfLayout(time.DateTime)
-	ec.EncodeTime = cEncodeTime
+	ec.EncodeTime = zapcore.TimeEncoderOfLayout(time.DateTime)
 	ec.EncodeLevel = zapcore.LowercaseLevelEncoder
-	return zapcore.NewConsoleEncoder(ec)
+	if cfg.Cfg.Encoding == "json" {
+		return zapcore.NewJSONEncoder(ec)
+	} else {
+		return zapcore.NewConsoleEncoder(ec)
+	}
 }
 
 func stdEncoder() zapcore.Encoder {
 	ec := zap.NewProductionEncoderConfig()
 	ec.EncodeTime = zapcore.TimeEncoderOfLayout(time.DateTime)
 	ec.EncodeLevel = zapcore.LowercaseColorLevelEncoder
-	return zapcore.NewConsoleEncoder(ec)
+	if cfg.Cfg.Encoding == "json" {
+		return zapcore.NewJSONEncoder(ec)
+	} else {
+		return zapcore.NewConsoleEncoder(ec)
+	}
 }
 
 var log *zap.Logger
@@ -62,7 +69,7 @@ func getLevel(level string) zapcore.Level {
 }
 
 func InitLogger() {
-	level := getLevel(cfg.Cfg.Logger.Level)
+	level := getLevel(cfg.Cfg.Level)
 	zap.LevelEnablerFunc(func(level zapcore.Level) bool {
 		return level >= zap.DebugLevel
 	})(level)
@@ -73,11 +80,6 @@ func InitLogger() {
 		zapcore.NewCore(fe, getLogWriter(), level),
 	)
 	log = zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
-}
-
-// cEncodeTime 自定义时间格式显示
-func cEncodeTime(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
-	enc.AppendString("[" + t.Format(time.DateTime) + "]")
 }
 
 func Debug(message string, fields ...zapcore.Field) {

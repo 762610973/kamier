@@ -3,31 +3,38 @@ package main
 import (
 	"compute/config"
 	"compute/core"
+	"compute/db"
 	zlog "compute/log"
 	"compute/server/controller"
 	"context"
-	"github.com/cloudwego/hertz/pkg/app/server"
 	"go.uber.org/zap"
 	"os"
 	"os/signal"
+	"strings"
 	"time"
 )
 
 func init() {
 	config.InitConfig()
 	zlog.InitLogger()
+	db.InitLeveldb()
 }
 
 func main() {
-	var err error
 	c := core.NewCore()
-	var h *server.Hertz
+	h := controller.RunHttpServer(c)
 	go func() {
-		err = controller.RunHttpServer(c, h)
-		if err != nil {
-			zlog.Error("start http server failed", zap.Error(err))
-			os.Exit(1)
-		}
+		go func() {
+			zlog.Info("start http server")
+			err := h.Run()
+			if err != nil {
+				if strings.Contains(err.Error(), "use of closed network connection") {
+					zlog.Info("begin graceful shutdown...")
+				} else {
+					zlog.Error("run http server failed", zap.Error(err))
+				}
+			}
+		}()
 	}()
 
 	signalCh := make(chan os.Signal, 1)
@@ -38,9 +45,9 @@ func main() {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 		err := h.Shutdown(ctx)
-		zlog.Info("graceful shutdown...")
 		if err != nil {
-			return
+			zlog.Error("graceful shutdown failed", zap.Error(err))
 		}
+		zlog.Info("graceful shutdown...")
 	}
 }

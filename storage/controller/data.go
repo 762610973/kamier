@@ -20,7 +20,7 @@ func AddData(_ context.Context, c *app.RequestContext) {
 		zlog.Error("AddData bind object failed", zap.Error(err))
 		model.ErrResponse(c, err)
 	}
-	err = db.InsertDocument(db.Data, d)
+	err = db.InsertDocument(db.Data, d, d.Id)
 	if err != nil {
 		model.ErrResponse(c, err)
 	} else {
@@ -29,7 +29,7 @@ func AddData(_ context.Context, c *app.RequestContext) {
 }
 func GetData(_ context.Context, c *app.RequestContext) {
 	id := c.Query("id")
-	err, data := db.FindDocument(db.Data, bson.M{"_id": id})
+	err, data := db.FindDocument(db.Data, bson.M{db.ID: id})
 	if err != nil {
 		model.ErrResponse(c, err)
 	} else {
@@ -49,7 +49,7 @@ func GetAllData(_ context.Context, c *app.RequestContext) {
 }
 func DeleteData(_ context.Context, c *app.RequestContext) {
 	id := c.Query("id")
-	err := db.DeleteDocument(db.Data, bson.M{"_id": id})
+	err := db.DeleteDocument(db.Data, bson.M{db.ID: id})
 	if err != nil {
 		model.ErrResponse(c, err)
 	} else {

@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"fmt"
+	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -16,9 +17,6 @@ import (
 var (
 	client = &mongo.Client{}
 	db     = &mongo.Database{}
-	fn     = &mongo.Collection{}
-	data   = &mongo.Collection{}
-	node   = &mongo.Collection{}
 	ctx    = context.Background()
 )
 
@@ -26,6 +24,7 @@ const (
 	Function = "function"
 	Data     = "data"
 	Node     = "node"
+	ID       = "_id"
 )
 
 func InitMongoDB() {
@@ -61,22 +60,18 @@ func InitMongoDB() {
 	}
 	// init database and collection
 	db = client.Database(cfg.Cfg.Storage.DBName)
-	fn = db.Collection(Function)
-	data = db.Collection(Data)
-	node = db.Collection(Node)
 }
 
 // InsertDocument 插入文档
-func InsertDocument(types string, value any) error {
+func InsertDocument(types string, value any, id string) error {
 	var err error
-	switch types {
-	case Function:
-		_, err = fn.InsertOne(ctx, value)
-	case Data:
-		_, err = data.InsertOne(ctx, value)
-	case Node:
-		_, err = node.InsertOne(ctx, value)
+	err = db.Collection(types).FindOne(ctx, bson.M{ID: id}).Err()
+	if err == nil {
+		zlog.Error("document exist, can't insert", zap.Error(err))
+		return errors.New("document exist, can't insert")
 	}
+	// err != nil, document not exist, insert document
+	_, err = db.Collection(types).InsertOne(ctx, value)
 	if err != nil {
 		zlog.Error(fmt.Sprintf("insert %s failed", types), zap.Error(err))
 		return err
@@ -102,8 +97,7 @@ func FindAllDocument(types string) (error, []bson.M) {
 	var err error
 	var res []bson.M
 	var cur *mongo.Cursor
-	findOpt := options.Find().SetProjection(bson.D{{"_id", 1}})
-	cur, err = db.Collection(types).Find(ctx, bson.M{}, findOpt)
+	cur, err = db.Collection(types).Find(ctx, bson.M{})
 	if err != nil {
 		zlog.Error("find collection failed", zap.Error(err))
 		return err, nil
@@ -118,7 +112,9 @@ func FindAllDocument(types string) (error, []bson.M) {
 
 // DeleteDocument 根据_id删除文档
 func DeleteDocument(types string, filter any) error {
-	_, err := db.Collection(types).DeleteOne(ctx, filter)
+	var err error
+	// delete a document without check exist
+	_, err = db.Collection(types).DeleteOne(ctx, filter)
 	if err != nil {
 		zlog.Error(fmt.Sprintf("%s delete failed", types), zap.Error(err))
 		return err

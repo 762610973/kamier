@@ -15,7 +15,7 @@ import (
 
 func GetFunc(_ context.Context, c *app.RequestContext) {
 	id := c.Query("id")
-	err, data := db.FindDocument(db.Function, bson.M{"_id": id})
+	err, data := db.FindDocument(db.Function, bson.M{db.ID: id})
 	if err != nil {
 		model.ErrResponse(c, err)
 	} else {
@@ -41,7 +41,7 @@ func AddFunc(_ context.Context, c *app.RequestContext) {
 		zlog.Error("AddFunc bind object failed", zap.Error(err))
 		model.ErrResponse(c, err)
 	}
-	err = db.InsertDocument(db.Function, f)
+	err = db.InsertDocument(db.Function, f, db.ID)
 	if err != nil {
 		model.ErrResponse(c, err)
 	}
@@ -49,7 +49,7 @@ func AddFunc(_ context.Context, c *app.RequestContext) {
 }
 func DeleteFunc(_ context.Context, c *app.RequestContext) {
 	id := c.Query("id")
-	err := db.DeleteDocument(db.Function, bson.M{"_id": id})
+	err := db.DeleteDocument(db.Function, bson.M{db.ID: id})
 	if err != nil {
 		model.ErrResponse(c, err)
 	} else {

@@ -23,7 +23,7 @@ func RegisterNode(_ context.Context, c *app.RequestContext) {
 		zlog.Error("RegisterNode bind object failed", zap.Error(err))
 		model.ErrResponse(c, err)
 	}
-	err = db.InsertDocument(db.Node, n)
+	err = db.InsertDocument(db.Node, n, n.Id)
 	if err != nil {
 		model.ErrResponse(c, err)
 	}
@@ -31,7 +31,7 @@ func RegisterNode(_ context.Context, c *app.RequestContext) {
 }
 func GetNode(_ context.Context, c *app.RequestContext) {
 	id := c.Query("id")
-	err, data := db.FindDocument(db.Node, bson.M{"_id": id})
+	err, data := db.FindDocument(db.Node, bson.M{db.ID: id})
 	if err != nil {
 		model.ErrResponse(c, err)
 	} else {
@@ -41,7 +41,7 @@ func GetNode(_ context.Context, c *app.RequestContext) {
 }
 func DeleteNode(_ context.Context, c *app.RequestContext) {
 	id := c.Query("id")
-	err := db.DeleteDocument(db.Node, bson.M{"_id": id})
+	err := db.DeleteDocument(db.Node, bson.M{db.ID: id})
 	if err != nil {
 		model.ErrResponse(c, err)
 	} else {

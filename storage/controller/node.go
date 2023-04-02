@@ -2,19 +2,20 @@ package controller
 
 import (
 	"context"
-	"fmt"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
-	"go.mongodb.org/mongo-driver/bson"
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
-	"storage/db"
 	zlog "storage/log"
 	"storage/model"
+	"sync"
 )
 
 func Ping(_ context.Context, c *app.RequestContext) {
 	c.String(consts.StatusOK, "OK")
 }
+
+var nodeMap = sync.Map{}
 
 func RegisterNode(_ context.Context, c *app.RequestContext) {
 	var n model.Node
@@ -23,54 +24,32 @@ func RegisterNode(_ context.Context, c *app.RequestContext) {
 		zlog.Error("RegisterNode bind object failed", zap.Error(err))
 		model.ErrResponse(c, err)
 	}
-	err = db.InsertDocument(db.Node, n, n.Id)
-	if err != nil {
-		model.ErrResponse(c, err)
-	}
+	nodeMap.Store(n.Name, n.Addr)
+	zlog.Info("register node success", zap.Any("node", n))
 	model.SuccessResponse(c, nil)
 }
 func GetNode(_ context.Context, c *app.RequestContext) {
-	id := c.Query("id")
-	err, data := db.FindDocument(db.Node, bson.M{db.ID: id})
-	if err != nil {
-		model.ErrResponse(c, err)
+	name := c.Query("name")
+	value, ok := nodeMap.Load(name)
+	if !ok {
+		zlog.Error("not found node", zap.String("name", name))
+		model.ErrResponse(c, errors.New("not found"))
 	} else {
-		zlog.Debug(fmt.Sprintf("Get Node by %s success", id))
-		model.SuccessResponse(c, data)
+		zlog.Info("get node success")
+		c.String(consts.StatusOK, value.(string))
 	}
 }
 func DeleteNode(_ context.Context, c *app.RequestContext) {
-	id := c.Query("id")
-	err := db.DeleteDocument(db.Node, bson.M{db.ID: id})
-	if err != nil {
-		model.ErrResponse(c, err)
-	} else {
-		zlog.Debug(fmt.Sprintf("Get Node by %s success", id))
-		model.SuccessResponse(c, nil)
-	}
+	name := c.Query("name")
+	nodeMap.Delete(name)
+	c.String(consts.StatusOK, model.Success)
 }
-func UpdateNode(_ context.Context, c *app.RequestContext) {
-	var f model.Node
-	err := c.Bind(&f)
-	if err != nil {
-		zlog.Error("bind node object failed", zap.Error(err))
-		model.ErrResponse(c, err)
-	} else {
-		err := db.UpdateDocument(db.Node, f.Id, f)
-		if err != nil {
-			zlog.Error("update node failed", zap.Error(err))
-			model.ErrResponse(c, err)
-		} else {
-			model.SuccessResponse(c, nil)
-		}
-	}
-}
+
 func GetAllNode(_ context.Context, c *app.RequestContext) {
-	err, res := db.FindAllDocument(db.Node)
-	if err != nil {
-		model.ErrResponse(c, err)
-	} else {
-		zlog.Debug("Get All Node success")
-		model.SuccessResponse(c, res)
-	}
+	var m map[string]string
+	nodeMap.Range(func(key, value any) bool {
+		m[key.(string)] = value.(string)
+		return true
+	})
+	model.SuccessResponse(c, m)
 }

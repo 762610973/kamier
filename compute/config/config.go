@@ -26,6 +26,8 @@ type Logger struct {
 }
 
 type NetWork struct {
+	// 本机节点名
+	OrgName  string `yaml:"orgName"`
 	HttpPort string `yaml:"httpPort"`
 
 	GrpcAddr string `yaml:"grpcAddr"`
@@ -35,6 +37,7 @@ type NetWork struct {
 }
 
 type Storage struct {
+	StorageUrl  string `yaml:"storageUrl"`
 	LevelDBPath string `yaml:"levelDBPath"`
 	MysqlAddr   string `yaml:"mysqlAddr"`
 	MysqlPort   string `yaml:"mysqlPort"`

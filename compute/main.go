@@ -1,23 +1,29 @@
 package main
 
 import (
+	"context"
+	"os"
+	"os/signal"
+	"strings"
+	"time"
+
+	"compute/client"
 	"compute/config"
 	"compute/core"
 	"compute/db"
 	zlog "compute/log"
 	"compute/server/controller"
-	"context"
+
 	"go.uber.org/zap"
-	"os"
-	"os/signal"
-	"strings"
-	"time"
 )
 
 func init() {
 	config.InitConfig()
 	zlog.InitLogger()
 	db.InitLeveldb()
+	if err := client.RegisterNode(); err != nil {
+		zlog.Panic("register node failed", zap.Error(err))
+	}
 }
 
 func main() {

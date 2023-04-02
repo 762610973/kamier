@@ -10,4 +10,10 @@
   - [grpc](http://doc.oschina.net/grpc)
 - 数据库
   - [leveldb](https://github.com/google/leveldb)
+
+
+- proto命令
+`protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative ./目标文件`
+
+- site: int32
     

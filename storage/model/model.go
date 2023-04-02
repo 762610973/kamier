@@ -19,9 +19,8 @@ type Data struct {
 }
 
 type Node struct {
-	Name string `bson:"name" json:"name"`
-	Id   string `bson:"_id" json:"id"`
-	Addr string `bson:"addr" json:"addr"`
+	Name string `json:"name"`
+	Addr string `json:"addr"`
 }
 
 type Response struct {

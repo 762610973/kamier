@@ -14,6 +14,7 @@ type Output struct {
 }
 type Pcb struct {
 }
+
 type ProcessTable struct {
 	sync.Map
 }

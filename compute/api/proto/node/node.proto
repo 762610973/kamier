@@ -1,8 +1,8 @@
 //! 定义节点间grpc通信的接口
 syntax = "proto3";
 
-package compute;
-option go_package = "../compute;compute";
+package node;
+option go_package = "./;node";
 
 message IpcReq{
   string orgName = 1;

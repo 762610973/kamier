@@ -25,6 +25,7 @@ func main() {
 	h := server.Default(config.Option{F: func(c *config.Options) {
 		c.Addr = fmt.Sprintf(":%s", cfg.Cfg.HttpPort)
 		c.Network = "tcp"
+		// 启动时不打印路由
 		c.DisablePrintRoute = true
 	}})
 	h.GET("/ping", ctl.Ping)
@@ -43,12 +44,12 @@ func main() {
 	h.DELETE("/data/delete/", ctl.DeleteData)
 	h.PUT("/data/update/", ctl.UpdateData)
 
-	// 节点
-	h.POST("/node/add", ctl.RegisterNode)
-	h.GET("/node/get/", ctl.GetNode)
-	h.DELETE("/node/delete/", ctl.DeleteNode)
-	h.POST("/node/update/", ctl.UpdateNode)
+	// 注册节点
+	h.POST("/node/register", ctl.RegisterNode)
+	// /node/get?name=xxx
+	h.GET("/node/get", ctl.GetNode)
 	h.GET("/node/getAllNode", ctl.GetAllNode)
+	h.DELETE("/node/delete/", ctl.DeleteNode)
 	go func() {
 		err := h.Run()
 		if err != nil {

@@ -34,34 +34,26 @@ type queue struct {
 	data    []int
 	idx     int
 	watcher chan int
-	sync.Mutex
 }
 
 func (q *queue) push(data int) {
 	fmt.Println("push", data)
-	q.Lock()
 	q.data = append(q.data, data)
 	if q.watcher != nil {
 		q.watcher <- data
 		q.idx = len(q.data)
-		fmt.Println("当前idx", q.idx)
-		//q.idx++
-		fmt.Println("idx=", q.idx)
 		q.watcher = nil
 	}
-	q.Unlock()
 }
 
 func (q *queue) watch(target int, waiter chan int) {
 	for i := q.idx; i < len(q.data); i++ {
-		fmt.Println("当前位置", i)
 		if q.data[i] == target {
 			q.idx++
 			waiter <- q.data[i]
 			return
 		}
 	}
-	fmt.Println("没有watch到值,等待push")
 	q.watcher = waiter
 }
 

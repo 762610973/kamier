@@ -3,6 +3,7 @@ module compute
 go 1.20
 
 require (
+	github.com/bytedance/go-tagexpr v2.7.4+incompatible
 	github.com/cloudwego/hertz v0.6.0
 	github.com/duke-git/lancet/v2 v2.1.17
 	github.com/fsnotify/fsnotify v1.6.0
@@ -10,6 +11,7 @@ require (
 	github.com/imroc/req/v3 v3.33.2
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/spf13/viper v1.15.0
+	github.com/stretchr/testify v1.8.2
 	github.com/syndtr/goleveldb v1.0.0
 	go.uber.org/zap v1.24.0
 	google.golang.org/grpc v1.52.0
@@ -23,6 +25,7 @@ require (
 	github.com/bytedance/sonic v1.8.1 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
 	github.com/cloudwego/netpoll v0.3.1 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fatih/color v1.15.0 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20210107165309-348f09dbbbc0 // indirect
 	github.com/golang/mock v1.6.0 // indirect
@@ -46,6 +49,7 @@ require (
 	github.com/nyaruka/phonenumbers v1.0.55 // indirect
 	github.com/onsi/ginkgo/v2 v2.2.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.6 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/quic-go/qpack v0.4.0 // indirect
 	github.com/quic-go/qtls-go1-18 v0.2.0 // indirect
 	github.com/quic-go/qtls-go1-19 v0.2.0 // indirect

@@ -1,10 +1,11 @@
 package consensus
 
 import (
-	zlog "compute/log"
-	"compute/model"
 	"encoding/json"
 	"io"
+
+	zlog "compute/log"
+	"compute/model"
 
 	"github.com/duke-git/lancet/v2/convertor"
 	"github.com/hashicorp/raft"

@@ -1,9 +1,10 @@
 package config
 
 import (
+	"log"
+
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
-	"log"
 )
 
 // Logger 日志级别,编码格式,日志输出位置的配置

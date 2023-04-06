@@ -3,7 +3,6 @@ module compute
 go 1.20
 
 require (
-	github.com/bytedance/go-tagexpr v2.7.4+incompatible
 	github.com/cloudwego/hertz v0.6.0
 	github.com/duke-git/lancet/v2 v2.1.17
 	github.com/fsnotify/fsnotify v1.6.0

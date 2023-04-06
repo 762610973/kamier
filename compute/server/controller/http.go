@@ -1,11 +1,14 @@
 package controller
 
 import (
+	"compute/server/service"
+	"context"
+
 	cfg "compute/config"
 	"compute/core"
 	zlog "compute/log"
 	"compute/model"
-	"context"
+
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/middlewares/server/recovery"
 	"github.com/cloudwego/hertz/pkg/app/server"
@@ -40,6 +43,11 @@ func (ctl *controller) SyncCompute(_ context.Context, c *app.RequestContext) {
 		zlog.Error("bindAndValidate failed", zap.Error(err))
 		model.ErrResponse(c, err)
 		return
+	}
+	output, err := service.SyncCompute(r)
+	if err != nil {
+		zlog.Error("sync compute failed", zap.Error(err))
+		model.ErrResponse(c, err)
 	}
 	zlog.Info("sync compute success")
 	c.JSON(consts.StatusOK, "success")

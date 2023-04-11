@@ -4,23 +4,54 @@ syntax = "proto3";
 package node;
 option go_package = "./;node";
 
-message IpcReq{
-  string orgName = 1;
+message Pid {
+  string nodeName = 1;
   int64 serial = 2;
-  bytes arg = 3;
 }
 
+// 节点间通信请求参数
+message IpcReq{
+  Pid pid = 1;
+  bytes arg = 2;
+}
+// 节点间通信相应
 message IpcRes {
   bytes res = 1;
 }
 
+// 准备请求
+message PrepareReq {
+  // 准备时，校验一下本节点是否在参与计算的列表里面
+  repeated string members = 1;
+  Pid pid = 2;
+}
+
+// 准备响应
+message PrepareRes {}
+
+// 启动请求参数
 message StartReq {
-  string orgName = 1;
-  int64 serial = 2;
+  int64 funcId = 1;
+  string members = 2;
+  Pid pid = 3;
 }
+// 启动响应
+message StartRes {}
 
-message StartRes {
-  string orgName = 1;
-  int64 serial = 2;
+// 获取值的请求参数
+message FetchReq {
+  Pid pid = 1;
+  string targetName = 2;
+  string sourceName = 3;
+  int64 step = 4;
 }
-
+// 获取值得响应
+message FetchRes {
+  bytes res = 1;
+}
+service NodeService {
+  rpc Prepare(PrepareReq) returns (PrepareRes);
+  rpc Start (StartReq) returns (StartRes);
+  rpc Ipc (IpcReq) returns (IpcRes);
+  rpc Fetch (FetchReq) returns (FetchRes);
+}

@@ -4,7 +4,7 @@ storage:
   mysqlPort: 3306
   storageUrl: http://localhost:1112
 network:
-  orgName: org1
+  nodeName: org1
   httpPort: 1113
   grpcAddr: 127.0.0.1
   grpcPort: 1114

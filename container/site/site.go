@@ -1,6 +1,6 @@
 package site
 
 type Site struct {
-	OrgName string
-	Site    int64
+	NodeName string
+	Site     int64
 }

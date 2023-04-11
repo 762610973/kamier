@@ -7,7 +7,7 @@ option go_package = "./;container";
 
 // 开始准备时的请求参数
 message PrepareReq {
-  string orgName = 1;
+  string nodeName = 1;
   int64 serial = 2;
 }
 
@@ -18,7 +18,7 @@ message FetchReq{}
 message FetchRes{}
 message AppendReq {
   int32 Type = 1;
-  string orgName = 2;
+  string nodeName = 2;
 }
 // AppendRes 添加值响应
 message AppendRes {}
@@ -26,7 +26,7 @@ message WatchRes {}
 
 // watch 公开值请求结构体
 message WatchReq{
-  string orgName = 1;
+  string nodeName = 1;
   int64 serial = 2;
   // 目标节点号
   int64 targetSite = 3;

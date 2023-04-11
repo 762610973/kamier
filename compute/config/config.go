@@ -28,7 +28,7 @@ type Logger struct {
 
 type NetWork struct {
 	// 本机节点名
-	OrgName  string `yaml:"orgName"`
+	NodeName string `yaml:"nodeName"`
 	HttpPort string `yaml:"httpPort"`
 
 	GrpcAddr string `yaml:"grpcAddr"`

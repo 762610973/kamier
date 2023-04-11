@@ -21,17 +21,17 @@ func InitLeveldb() {
 	}
 }
 
-func StoreSerial(orgName string, serial int) error {
+func StoreSerial(nodeName string, serial int) error {
 	val := strconv.Itoa(serial)
-	if err := db.Put([]byte(orgName), []byte(val), nil); err != nil {
+	if err := db.Put([]byte(nodeName), []byte(val), nil); err != nil {
 		zlog.Error("store serial failed", zap.Error(err))
 		return err
 	}
 	return nil
 }
 
-func LoadSerial(orgName string) (int, error) {
-	serial, err := db.Get([]byte(orgName), nil)
+func LoadSerial(nodeName string) (int, error) {
+	serial, err := db.Get([]byte(nodeName), nil)
 	if err != nil {
 		//zlog.Error("load serial failed", zap.Error(err))
 		return 0, err

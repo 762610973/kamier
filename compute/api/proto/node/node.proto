@@ -32,7 +32,7 @@ message PrepareRes {}
 // 启动请求参数
 message StartReq {
   int64 funcId = 1;
-  string members = 2;
+  repeated string members = 2;
   Pid pid = 3;
 }
 // 启动响应

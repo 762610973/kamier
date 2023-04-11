@@ -1,12 +1,17 @@
 package client
 
 import (
+	"context"
 	"fmt"
 
+	"compute/api/proto/node"
 	cfg "compute/config"
 	zlog "compute/log"
+	"compute/model"
 
 	"github.com/imroc/req/v3"
+	"go.uber.org/zap"
+	"google.golang.org/grpc"
 )
 
 const (
@@ -39,4 +44,54 @@ func GetHost(nodeName string) (string, error) {
 		return "", err
 	}
 	return resp.String(), nil
+}
+
+// Ipc 请求参与运算的节点
+func Ipc(nodeName string, pid *model.Pid, arg []byte) ([]byte, error) {
+	clientConn, err := grpc.Dial(nodeMap[nodeName])
+	if err != nil {
+		zlog.Error(fmt.Sprintf("grpc dial %s failed", nodeName))
+		return nil, err
+	}
+	client := node.NewNodeServiceClient(clientConn)
+	res, err := client.Ipc(context.Background(), &node.IpcReq{
+		Pid: &node.Pid{
+			NodeName: pid.NodeName,
+			Serial:   pid.Serial,
+		},
+		Arg: arg,
+	})
+	if err != nil {
+		zlog.Error("grpc ipc failed", zap.Error(err))
+		return nil, err
+	}
+	zlog.Debug("grpc ipc success")
+	return res.Res, nil
+}
+
+func Start(nodeName string, funcId int64, members []string, pid *model.Pid) error {
+	clientConn, err := grpc.Dial(nodeMap[nodeName])
+	if err != nil {
+		zlog.Error(fmt.Sprintf("grpc dial %s failed", nodeName))
+		return err
+	}
+	client := node.NewNodeServiceClient(clientConn)
+	_, err = client.Start(context.Background(), &node.StartReq{
+		FuncId:  funcId,
+		Members: members,
+		Pid: &node.Pid{
+			NodeName: pid.NodeName,
+			Serial:   pid.Serial,
+		},
+	})
+	if err != nil {
+		zlog.Error("grpc start failed", zap.Error(err))
+		return err
+	}
+	zlog.Debug("grpc start success")
+	return nil
+}
+
+func Fetch() {
+
 }

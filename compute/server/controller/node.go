@@ -5,6 +5,6 @@ import (
 	"google.golang.org/grpc"
 )
 
-func RunGrpcProcessServer(core *core.Core) (*grpc.Server, error) {
+func RunGrpcProcessServer(core *core.core) (*grpc.Server, error) {
 	return nil, nil
 }

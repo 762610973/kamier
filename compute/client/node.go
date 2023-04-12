@@ -69,7 +69,8 @@ func Ipc(nodeName string, pid *model.Pid, arg []byte) ([]byte, error) {
 	return res.Res, nil
 }
 
-func Start(nodeName string, funcId int64, members []string, pid *model.Pid) error {
+// Start 发起启动计算的请求
+func Start(nodeName string, funcId string, pid *model.Pid) error {
 	clientConn, err := grpc.Dial(nodeMap[nodeName])
 	if err != nil {
 		zlog.Error(fmt.Sprintf("grpc dial %s failed", nodeName))
@@ -77,8 +78,7 @@ func Start(nodeName string, funcId int64, members []string, pid *model.Pid) erro
 	}
 	client := node.NewNodeServiceClient(clientConn)
 	_, err = client.Start(context.Background(), &node.StartReq{
-		FuncId:  funcId,
-		Members: members,
+		FuncId: funcId,
 		Pid: &node.Pid{
 			NodeName: pid.NodeName,
 			Serial:   pid.Serial,
@@ -92,6 +92,46 @@ func Start(nodeName string, funcId int64, members []string, pid *model.Pid) erro
 	return nil
 }
 
-func Fetch() {
+// Fetch 从其他节点获取值
+func Fetch(nodeName string, pid *model.Pid, targetName, sourceName string, step int64) ([]byte, error) {
+	clientConn, err := grpc.Dial(nodeMap[nodeName])
+	if err != nil {
+		zlog.Error(fmt.Sprintf("grpc dial %s failed", nodeName))
+		return nil, err
+	}
+	client := node.NewNodeServiceClient(clientConn)
+	res, err := client.Fetch(context.Background(), &node.FetchReq{
+		Pid: &node.Pid{
+			NodeName: pid.NodeName,
+			Serial:   pid.Serial,
+		},
+		TargetName: targetName,
+		SourceName: sourceName,
+		Step:       step,
+	})
+	if err != nil {
+		zlog.Error("grpc fetch failed", zap.Error(err))
+		return nil, err
+	}
+	zlog.Debug("grpc prepare success")
+	return res.Res, nil
+}
 
+// Prepare 发起准备请求
+func Prepare(nodeName string, members []string) error {
+	clientConn, err := grpc.Dial(nodeMap[nodeName])
+	if err != nil {
+		zlog.Error(fmt.Sprintf("grpc dial %s failed", nodeName))
+		return err
+	}
+	client := node.NewNodeServiceClient(clientConn)
+	_, err = client.Prepare(context.Background(), &node.PrepareReq{
+		Members: members,
+	})
+	if err != nil {
+		zlog.Error("grpc prepare failed", zap.Error(err))
+		return err
+	}
+	zlog.Debug("grpc prepare success")
+	return nil
 }

@@ -7,7 +7,6 @@ import (
 	zlog "compute/log"
 	"compute/model"
 
-	"github.com/duke-git/lancet/v2/convertor"
 	"github.com/hashicorp/raft"
 	"go.uber.org/zap"
 )
@@ -45,7 +44,7 @@ type value struct {
 
 func (f *fsm) Apply(l *raft.Log) any {
 	var tmp model.ConsensusReq
-	err := convertor.DecodeByte(l.Data, &tmp)
+	err := json.Unmarshal(l.Data, &tmp)
 	if err != nil {
 		zlog.Error("applied data decode failed", zap.Error(err))
 		return err

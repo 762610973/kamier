@@ -5,7 +5,6 @@ import (
 	"context"
 
 	cfg "compute/config"
-	"compute/core"
 	zlog "compute/log"
 	"compute/model"
 
@@ -13,31 +12,24 @@ import (
 	"github.com/cloudwego/hertz/pkg/app/middlewares/server/recovery"
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"github.com/cloudwego/hertz/pkg/common/config"
-	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	"go.uber.org/zap"
 )
 
-type controller struct {
-	*core.Core
-}
-
-func RunHttpServer(core *core.Core) *server.Hertz {
+func RunHttpServer() *server.Hertz {
 	h := server.New(config.Option{F: func(o *config.Options) {
 		o.Addr = ":" + cfg.Cfg.NetWork.HttpPort
 		o.DisablePrintRoute = true
 	}})
 	h.Use(recovery.Recovery())
-	ctl := controller{core}
-	h.POST("/syncCompute", ctl.SyncCompute)
-	h.POST("/asyncCompute")
-	h.POST("/getOutput")
+	h.POST("/syncCompute", syncCompute)
+	h.POST("/asyncCompute", asyncCompute)
+	h.POST("/getOutput", getOutput)
 	return h
 }
 
-func (ctl *controller) SyncCompute(_ context.Context, c *app.RequestContext) {
+func syncCompute(_ context.Context, c *app.RequestContext) {
 	var r model.Request
 	var err error
-	//err = c.Bind(&r)
 	err = c.BindAndValidate(&r)
 	if err != nil {
 		zlog.Error("bindAndValidate failed", zap.Error(err))
@@ -48,7 +40,44 @@ func (ctl *controller) SyncCompute(_ context.Context, c *app.RequestContext) {
 	if err != nil {
 		zlog.Error("sync compute failed", zap.Error(err))
 		model.ErrResponse(c, err)
+		return
 	}
 	zlog.Info("sync compute success")
-	c.JSON(consts.StatusOK, "success")
+	model.SuccessResponse(c, output)
+}
+
+func asyncCompute(_ context.Context, c *app.RequestContext) {
+	var r model.Request
+	var err error
+	err = c.BindAndValidate(&r)
+	if err != nil {
+		zlog.Error("bindAndValidate failed", zap.Error(err))
+		model.ErrResponse(c, err)
+		return
+	}
+	pid, err := service.ASyncCompute(r)
+	if err != nil {
+		zlog.Error("async compute failed", zap.Error(err))
+		model.ErrResponse(c, err)
+		return
+	}
+	zlog.Info("async compute start success")
+	model.SuccessResponse(c, pid)
+}
+
+func getOutput(_ context.Context, c *app.RequestContext) {
+	var p model.Pid
+	var err error
+	err = c.Bind(&p)
+	if err != nil {
+		zlog.Error("bind failed", zap.Error(err))
+		return
+	}
+	output, err := service.GetOutput(p)
+	if err != nil {
+		zlog.Error("get output by pid failed", zap.Error(err), zap.Any("pid", p))
+		model.ErrResponse(c, err)
+	}
+	zlog.Info("get output success")
+	model.SuccessResponse(c, output)
 }

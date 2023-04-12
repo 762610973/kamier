@@ -15,8 +15,9 @@ type Output struct {
 type Pcb struct {
 }
 
+// ProcessTable 进程表,key: pid;value: pcb
 type ProcessTable struct {
-	sync.Map
+	m sync.Map
 }
 
 func NewPT() *ProcessTable {
@@ -24,16 +25,16 @@ func NewPT() *ProcessTable {
 }
 
 func (p *ProcessTable) Put(pid Pid, pcb *Pcb) {
-	p.Map.Store(pid, pcb)
+	p.m.Store(pid, pcb)
 }
 
 func (p *ProcessTable) Get(pid Pid) (bool, *Pcb) {
-	val, ok := p.Map.Load(pid)
+	val, ok := p.m.Load(pid)
 	if ok {
 		return true, val.(*Pcb)
 	}
 	return false, nil
 }
 func (p *ProcessTable) Delete(pid Pid) {
-	p.Map.Delete(pid)
+	p.m.Delete(pid)
 }

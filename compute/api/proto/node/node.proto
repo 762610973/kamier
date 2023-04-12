@@ -23,7 +23,6 @@ message IpcRes {
 message PrepareReq {
   // 准备时，校验一下本节点是否在参与计算的列表里面
   repeated string members = 1;
-  Pid pid = 2;
 }
 
 // 准备响应
@@ -31,9 +30,8 @@ message PrepareRes {}
 
 // 启动请求参数
 message StartReq {
-  int64 funcId = 1;
-  repeated string members = 2;
-  Pid pid = 3;
+  string funcId = 1;
+  Pid pid = 2;
 }
 // 启动响应
 message StartRes {}

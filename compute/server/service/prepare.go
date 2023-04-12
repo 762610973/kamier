@@ -1,4 +1,4 @@
-package core
+package service
 
 type prepareValue struct {
 }

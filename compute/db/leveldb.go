@@ -1,6 +1,7 @@
 package db
 
 import (
+	"encoding/json"
 	"strconv"
 
 	cfg "compute/config"
@@ -21,29 +22,56 @@ func InitLeveldb() {
 	}
 }
 
-func StoreSerial(nodeName string, serial int) error {
-	val := strconv.Itoa(serial)
+func StoreSerial(nodeName string, serial int64) error {
+	val := strconv.FormatInt(serial, 10)
 	if err := db.Put([]byte(nodeName), []byte(val), nil); err != nil {
-		zlog.Error("store serial failed", zap.Error(err))
 		return err
 	}
 	return nil
 }
 
-func LoadSerial(nodeName string) (int, error) {
+const (
+	SerialNotExists   = -1
+	SerialParseFailed = -2
+)
+
+// LoadSerial 从leveldb中加载序列号
+func LoadSerial(nodeName string) (int64, error) {
 	serial, err := db.Get([]byte(nodeName), nil)
 	if err != nil {
-		//zlog.Error("load serial failed", zap.Error(err))
-		return 0, err
+		zlog.Error("load serial failed", zap.Error(err))
+		return SerialNotExists, err
 	}
-	return strconv.Atoi(string(serial))
+	res, err := strconv.ParseInt(string(serial), 10, 64)
+	if err != nil {
+		zlog.Error("parse serial failed", zap.Error(err))
+		return SerialParseFailed, err
+	}
+	return res, nil
 }
 
-func StoreOutput(pid model.Pid) error {
+func StoreOutput(pid model.Pid, output model.Output) error {
 
 	return nil
 }
 
-func LoadOutput() *model.Output {
-	return nil
+func LoadOutput(pid model.Pid) (*model.Output, error) {
+	key, err := json.Marshal(pid)
+	if err != nil {
+		zlog.Error("marshal pid failed", zap.Error(err), zap.Any("pid", pid))
+		return nil, err
+	}
+	output, err := db.Get(key, nil)
+	if err != nil {
+		zlog.Error("get output failed", zap.Error(err), zap.Any("key", pid))
+		return nil, err
+	}
+	var res model.Output
+	err = json.Unmarshal(output, &res)
+	if err != nil {
+		zlog.Error("unmarshal output failed", zap.Error(err))
+		return nil, err
+	}
+	zlog.Info("load output success")
+	return &res, nil
 }

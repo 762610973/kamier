@@ -1,4 +1,4 @@
-package core
+package service
 
 import (
 	"sync"
@@ -6,15 +6,17 @@ import (
 	"compute/model"
 )
 
+var C = NewCore()
+
 type Core struct {
-	processTable *model.ProcessTable
+	*model.ProcessTable
 	lock         sync.Mutex
 	prepareTable sync.Map
 }
 
 func NewCore() *Core {
 	return &Core{
-		processTable: model.NewPT(),
+		ProcessTable: model.NewPT(),
 		lock:         sync.Mutex{},
 		prepareTable: sync.Map{},
 	}

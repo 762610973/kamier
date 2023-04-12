@@ -9,7 +9,6 @@ import (
 
 	"compute/client"
 	"compute/config"
-	"compute/core"
 	"compute/db"
 	zlog "compute/log"
 	"compute/server/controller"
@@ -27,8 +26,7 @@ func init() {
 }
 
 func main() {
-	c := core.NewCore()
-	h := controller.RunHttpServer(c)
+	h := controller.RunHttpServer()
 	go func() {
 		go func() {
 			zlog.Info("start http server")

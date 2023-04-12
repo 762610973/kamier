@@ -28,9 +28,13 @@ func SyncCompute(req model.Request) (*model.Output, error) {
 
 	return nil, nil
 }
+
+// ASyncCompute 异步计算
 func ASyncCompute(req model.Request) (*model.Pid, error) {
 	return nil, nil
 }
+
+// GetOutput 获取结果
 func GetOutput(pid model.Pid) (*model.Output, error) {
 	return db.LoadOutput(pid)
 }

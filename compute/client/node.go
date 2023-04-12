@@ -46,27 +46,23 @@ func GetHost(nodeName string) (string, error) {
 	return resp.String(), nil
 }
 
-// Ipc 请求参与运算的节点
-func Ipc(nodeName string, pid *model.Pid, arg []byte) ([]byte, error) {
+// Prepare 发起准备请求
+func Prepare(nodeName string, members []string) error {
 	clientConn, err := grpc.Dial(nodeMap[nodeName])
 	if err != nil {
 		zlog.Error(fmt.Sprintf("grpc dial %s failed", nodeName))
-		return nil, err
+		return err
 	}
 	client := node.NewNodeServiceClient(clientConn)
-	res, err := client.Ipc(context.Background(), &node.IpcReq{
-		Pid: &node.Pid{
-			NodeName: pid.NodeName,
-			Serial:   pid.Serial,
-		},
-		Arg: arg,
+	_, err = client.Prepare(context.Background(), &node.PrepareReq{
+		Members: members,
 	})
 	if err != nil {
-		zlog.Error("grpc ipc failed", zap.Error(err))
-		return nil, err
+		zlog.Error("grpc prepare failed", zap.Error(err))
+		return err
 	}
-	zlog.Debug("grpc ipc success")
-	return res.Res, nil
+	zlog.Debug("grpc prepare success")
+	return nil
 }
 
 // Start 发起启动计算的请求
@@ -117,21 +113,25 @@ func Fetch(nodeName string, pid *model.Pid, targetName, sourceName string, step 
 	return res.Res, nil
 }
 
-// Prepare 发起准备请求
-func Prepare(nodeName string, members []string) error {
+// Ipc 想leader节点发起请求添加值
+func Ipc(nodeName string, pid *model.Pid, arg []byte) ([]byte, error) {
 	clientConn, err := grpc.Dial(nodeMap[nodeName])
 	if err != nil {
 		zlog.Error(fmt.Sprintf("grpc dial %s failed", nodeName))
-		return err
+		return nil, err
 	}
 	client := node.NewNodeServiceClient(clientConn)
-	_, err = client.Prepare(context.Background(), &node.PrepareReq{
-		Members: members,
+	res, err := client.Ipc(context.Background(), &node.IpcReq{
+		Pid: &node.Pid{
+			NodeName: pid.NodeName,
+			Serial:   pid.Serial,
+		},
+		Arg: arg,
 	})
 	if err != nil {
-		zlog.Error("grpc prepare failed", zap.Error(err))
-		return err
+		zlog.Error("grpc ipc failed", zap.Error(err))
+		return nil, err
 	}
-	zlog.Debug("grpc prepare success")
-	return nil
+	zlog.Debug("grpc ipc success")
+	return res.Res, nil
 }

@@ -1,6 +1,7 @@
 package model
 
 import (
+	"compute/consensus"
 	"sync"
 )
 
@@ -13,6 +14,10 @@ type Pid struct {
 type Output struct {
 }
 type Pcb struct {
+	prepared  *prepareValue
+	callback  chan<- *Output
+	consensus *consensus.Raft
+	selfSite  int64
 }
 
 // ProcessTable 进程表,key: pid;value: pcb

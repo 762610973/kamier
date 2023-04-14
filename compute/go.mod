@@ -6,6 +6,7 @@ require (
 	github.com/cloudwego/hertz v0.6.0
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/hashicorp/raft v1.4.0
+	github.com/hashicorp/raft-boltdb v0.0.0-20230125174641-2a8082862702
 	github.com/imroc/req/v3 v3.33.2
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/pkg/errors v0.9.1
@@ -20,6 +21,7 @@ require (
 require (
 	github.com/BurntSushi/toml v1.2.1 // indirect
 	github.com/armon/go-metrics v0.4.1 // indirect
+	github.com/boltdb/bolt v1.3.1 // indirect
 	github.com/bytedance/go-tagexpr/v2 v2.9.2 // indirect
 	github.com/bytedance/gopkg v0.0.0-20220413063733-65bf48ffb3a7 // indirect
 	github.com/bytedance/sonic v1.8.1 // indirect

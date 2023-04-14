@@ -1,15 +1,25 @@
 package service
 
 import (
+	"context"
+	"fmt"
+	"sync"
+	"time"
+
 	gclient "compute/client"
 	"compute/config"
+	"compute/core"
 	"compute/db"
 	zlog "compute/log"
 	"compute/model"
-	"context"
-	"fmt"
+
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
-	"sync"
+)
+
+const (
+	TimeoutErr = "There were no results for a long time"
+	OutputErr  = "Can't get output"
 )
 
 // SyncCompute 同步计算处理逻辑,发起准备,启动计算
@@ -25,8 +35,22 @@ func SyncCompute(req model.Request) (*model.Output, error) {
 		return nil, err
 	}
 	allNodeStart(req.Members, req.FunctionId, pid)
-
-	return nil, nil
+	callback := make(chan *model.Output)
+	core.C.StartProcess(pid, req.FunctionId, req.Members, callback)
+	after := time.After(time.Second * 30)
+	select {
+	case output := <-callback:
+		if output != nil {
+			zlog.Debug("get output success")
+			return output, nil
+		} else {
+			zlog.Warn(OutputErr)
+			return nil, errors.New(OutputErr)
+		}
+	case <-after:
+		zlog.Info(TimeoutErr)
+		return nil, errors.New(TimeoutErr)
+	}
 }
 
 // ASyncCompute 异步计算
@@ -99,17 +123,18 @@ func allNodePrepare(members []string) error {
 				if err != nil {
 					zlog.Error(fmt.Sprint(member, "prepare failed"))
 					cancel()
-					return
+				} else {
+					d <- struct{}{}
 				}
-				d <- struct{}{}
 			}
 		}(member, doneCh[index])
 	}
-	for _, done := range doneCh {
+	for idx, done := range doneCh {
 		select {
 		case <-done:
 			continue
 		case <-ctx.Done():
+			zlog.Warn(members[idx]+"prepare failed", zap.Error(err))
 			return err
 		}
 	}
@@ -117,6 +142,7 @@ func allNodePrepare(members []string) error {
 	return nil
 }
 
+// allNodeStart 并发请求除本节点外的所有节点开始启动
 func allNodeStart(members []string, funcId string, pid *model.Pid) {
 	var wg sync.WaitGroup
 	var err error

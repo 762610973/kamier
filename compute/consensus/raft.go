@@ -1,14 +1,9 @@
 package consensus
 
 import (
-	"context"
-	"golang.org/x/sys/windows"
 	"math/rand"
-	"net"
 	"os"
 	"strconv"
-	"syscall"
-	"time"
 
 	cfg "compute/config"
 
@@ -61,6 +56,7 @@ func NewRaft(members []string) (*Raft, error) {
 		zlog.Error("new raft failed", zap.Error(err))
 		return nil, err
 	}
+	zlog.Info("new raft node success")
 	return &Raft{
 		raft:     rf,
 		tempFile: []string{lPath, sPath},

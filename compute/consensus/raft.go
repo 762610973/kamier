@@ -68,6 +68,11 @@ func (r *Raft) BuildConsensus() error {
 	return nil
 }
 
+// ShutDown 关闭共识
+func (r *Raft) ShutDown() error {
+	return r.raft.Shutdown().Error()
+}
+
 func raftId(members []string) string {
 	var res int
 	for idx, member := range members {

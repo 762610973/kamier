@@ -12,6 +12,8 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+var log *zap.Logger
+
 func getLogWriter() zapcore.WriteSyncer {
 	lumberJackLogger := &lumberjack.Logger{
 		Filename:   cfg.Cfg.FileName,
@@ -22,6 +24,7 @@ func getLogWriter() zapcore.WriteSyncer {
 	}
 	return zapcore.AddSync(lumberJackLogger)
 }
+
 func fileEncoder() zapcore.Encoder {
 	ec := zap.NewProductionEncoderConfig()
 	// 时间格式
@@ -45,24 +48,22 @@ func stdEncoder() zapcore.Encoder {
 	}
 }
 
-var log *zap.Logger
-
 const (
-	DebugLevel = "debug"
-	InfoLevel  = "info"
-	WarnLevel  = "warn"
-	ErrorLevel = "error"
+	debugLevel = "debug"
+	infoLevel  = "info"
+	warnLevel  = "warn"
+	errorLevel = "error"
 )
 
 func getLevel(level string) zapcore.Level {
 	switch strings.ToLower(level) {
-	case DebugLevel:
+	case debugLevel:
 		return zapcore.DebugLevel
-	case InfoLevel:
+	case infoLevel:
 		return zapcore.InfoLevel
-	case ErrorLevel:
+	case errorLevel:
 		return zapcore.ErrorLevel
-	case WarnLevel:
+	case warnLevel:
 		return zap.WarnLevel
 	default:
 		return zapcore.PanicLevel
@@ -86,9 +87,11 @@ func InitLogger() {
 func Debug(message string, fields ...zapcore.Field) {
 	log.Debug(message, fields...)
 }
+
 func Info(message string, fields ...zapcore.Field) {
 	log.Info(message, fields...)
 }
+
 func Warn(message string, fields ...zapcore.Field) {
 	log.Warn(message, fields...)
 }

@@ -50,8 +50,22 @@ func LoadSerial(nodeName string) (int64, error) {
 	return res, nil
 }
 
+// StoreOutput 保存结果
 func StoreOutput(pid model.Pid, output model.Output) error {
-
+	key, err := json.Marshal(pid)
+	if err != nil {
+		zlog.Error("marshal pid as key failed", zap.Error(err))
+		return err
+	}
+	val, err := json.Marshal(output)
+	if err != nil {
+		zlog.Error("marshal output as value failed", zap.Error(err))
+		return err
+	}
+	if err = db.Put(key, val, nil); err != nil {
+		zlog.Error("db.put failed", zap.Error(err))
+		return err
+	}
 	return nil
 }
 

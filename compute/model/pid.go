@@ -7,4 +7,6 @@ type Pid struct {
 }
 
 type Output struct {
+	StdOut string `json:"output,omitempty"`
+	StdErr string `json:"err,omitempty"`
 }

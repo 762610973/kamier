@@ -4,6 +4,10 @@ syntax = "proto3";
 package container;
 
 option go_package = "./;container";
+message Pid {
+  string nodeName = 1;
+  int64 serial = 2;
+}
 
 // 开始准备时的请求参数
 message PrepareReq {
@@ -14,8 +18,12 @@ message PrepareReq {
 // 准备完成时的响应
 message PrepareRes {}
 
-message FetchReq{}
-message FetchRes{}
+message FetchReq{
+  Pid pid = 1;
+}
+message FetchRes{
+  bytes res = 1;
+}
 message AppendReq {
   int32 Type = 1;
   string nodeName = 2;
@@ -34,13 +42,13 @@ message WatchReq{
 
 
 
-service ControllerService {
+service ContainerService {
   // 准备值
-  rpc Prepare(PrepareReq) returns (PrepareRes);
+  rpc PrepareValue(PrepareReq) returns (PrepareRes);
   // 获取值
-  rpc Fetch(FetchReq) returns (FetchRes);
+  rpc FetchValue(FetchReq) returns (FetchRes);
   // Append 添加值
-  rpc Append(AppendReq) returns (AppendRes);
+  rpc AppendValue(AppendReq) returns (AppendRes);
   // watch完成标记
-  rpc Watch(WatchReq) returns (WatchRes);
+  rpc WatchValue(WatchReq) returns (WatchRes);
 }

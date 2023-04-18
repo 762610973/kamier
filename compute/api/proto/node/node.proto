@@ -47,6 +47,7 @@ message FetchReq {
 message FetchRes {
   bytes res = 1;
 }
+
 service NodeService {
   rpc Prepare(PrepareReq) returns (PrepareRes);
   rpc Start (StartReq) returns (StartRes);

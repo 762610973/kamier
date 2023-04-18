@@ -2,20 +2,23 @@ package core
 
 import (
 	"bytes"
-	cfg "compute/config"
-	"compute/db"
-	zlog "compute/log"
 	"flag"
-	"github.com/pkg/errors"
-	"go.uber.org/zap"
 	"os"
 	"os/exec"
 	"strconv"
 	"sync"
 
+	"compute/api/proto/container"
+	"compute/api/proto/node"
 	"compute/client"
+	cfg "compute/config"
 	"compute/consensus"
+	"compute/db"
+	zlog "compute/log"
 	"compute/model"
+
+	"github.com/pkg/errors"
+	"go.uber.org/zap"
 )
 
 var C = NewCore()
@@ -23,6 +26,8 @@ var C = NewCore()
 type Core struct {
 	*processTable
 	lock sync.Mutex
+	node.UnimplementedNodeServiceServer
+	container.UnimplementedContainerServiceServer
 }
 
 func NewCore() *Core {

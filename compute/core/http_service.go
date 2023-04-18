@@ -1,4 +1,4 @@
-package service
+package core
 
 import (
 	"context"
@@ -8,7 +8,6 @@ import (
 
 	gclient "compute/client"
 	"compute/config"
-	"compute/core"
 	"compute/db"
 	zlog "compute/log"
 	"compute/model"
@@ -35,8 +34,9 @@ func SyncCompute(req model.Request) (*model.Output, error) {
 		return nil, err
 	}
 	allNodeStart(req.Members, req.FunctionId, pid)
-	callback := make(chan *model.Output)
-	core.C.StartProcess(pid, req.FunctionId, req.Members, callback)
+	callback := make(chan *model.Output, 1)
+	errCh := make(chan error, 1)
+	C.StartProcess(*pid, req.FunctionId, req.Members, callback, errCh)
 	after := time.After(time.Second * 30)
 	select {
 	case output := <-callback:

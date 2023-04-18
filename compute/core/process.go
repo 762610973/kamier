@@ -1,14 +1,15 @@
 package core
 
 import (
-	zlog "compute/log"
 	"errors"
-	"go.uber.org/zap"
 	"os"
 	"sync"
 
 	"compute/consensus"
+	zlog "compute/log"
 	"compute/model"
+
+	"go.uber.org/zap"
 )
 
 // processTable 进程表,key: pid;value: pcb

@@ -29,6 +29,7 @@ func init() {
 func main() {
 	h := controller.RunHttpServer()
 	var nodeServer *grpc.Server
+	var containerServer *grpc.Server
 	var err error
 	go func() {
 		zlog.Info("start http server")
@@ -48,6 +49,12 @@ func main() {
 			errCh <- err
 		}
 	}()
+	go func() {
+		containerServer, err = controller.RunGrpcContainerServer()
+		if err != nil {
+			errCh <- err
+		}
+	}()
 
 	signalCh := make(chan os.Signal, 1)
 	signal.Notify(signalCh, os.Interrupt, os.Kill)
@@ -58,6 +65,7 @@ func main() {
 		defer cancel()
 		err = h.Shutdown(ctx)
 		nodeServer.GracefulStop()
+		containerServer.GracefulStop()
 		if err != nil {
 			zlog.Error("graceful shutdown failed", zap.Error(err))
 		}

@@ -38,6 +38,8 @@ func SyncCompute(req model.Request) (*model.Output, error) {
 	errCh := make(chan error, 1)
 	C.StartProcess(*pid, req.FunctionId, req.Members, callback, errCh)
 	after := time.After(time.Second * 30)
+	defer close(callback)
+	defer close(errCh)
 	select {
 	case output := <-callback:
 		if output != nil {
@@ -50,7 +52,11 @@ func SyncCompute(req model.Request) (*model.Output, error) {
 	case <-after:
 		zlog.Info(TimeoutErr)
 		return nil, errors.New(TimeoutErr)
+	case err = <-errCh:
+		zlog.Error("exec failed", zap.Error(err))
+		return nil, err
 	}
+
 }
 
 // ASyncCompute 异步计算

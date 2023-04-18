@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"compute/server/service"
+	"compute/core"
 	"context"
 
 	cfg "compute/config"
@@ -36,7 +36,7 @@ func syncCompute(_ context.Context, c *app.RequestContext) {
 		model.ErrResponse(c, err)
 		return
 	}
-	output, err := service.SyncCompute(r)
+	output, err := core.SyncCompute(r)
 	if err != nil {
 		zlog.Error("sync compute failed", zap.Error(err))
 		model.ErrResponse(c, err)

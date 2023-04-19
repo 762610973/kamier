@@ -1,24 +1,70 @@
 package core
 
 import (
+	cfg "compute/config"
+	zlog "compute/log"
+	"compute/model"
 	"context"
+	"fmt"
+	"github.com/pkg/errors"
+	"go.uber.org/zap"
+	"time"
 
 	"compute/api/proto/node"
 )
 
+// Prepare 参与运算的结点准备启动时校验本节点名即可
 func (c *Core) Prepare(_ context.Context, req *node.PrepareReq) (*node.PrepareRes, error) {
-	//TODO implement me
-	panic("implement me")
+	var exist bool
+	for _, member := range req.Members {
+		if member == cfg.Cfg.NodeName {
+			exist = true
+			break
+		}
+	}
+	if exist {
+		zlog.Info("prepare exec complete")
+		return &node.PrepareRes{}, nil
+	} else {
+		zlog.Error(fmt.Sprint(cfg.Cfg.NodeName, "not int compute members"))
+		return nil, errors.New(fmt.Sprint(cfg.Cfg.NodeName, "not int compute members"))
+	}
 }
 
+// Start 参与运算的节点开始启动,不需要准备工作,直接启动即可
 func (c *Core) Start(_ context.Context, req *node.StartReq) (*node.StartRes, error) {
-	//TODO implement me
-	panic("implement me")
+	errCh := make(chan error, 1)
+	c.StartProcess(model.Pid{
+		NodeName: req.Pid.NodeName,
+		Serial:   req.Pid.Serial,
+	}, req.FuncId, req.Members, nil, errCh)
+	timeout := time.After(time.Second * 30)
+	select {
+	case err := <-errCh:
+		if err != nil {
+			zlog.Error("exec failed", zap.Error(err))
+			return nil, err
+		}
+		return &node.StartRes{}, nil
+	case <-timeout:
+		zlog.Error(TimeoutErr)
+		return nil, errors.New(TimeoutErr)
+	}
 }
 
+// Ipc 容器内程序向共识队列中添加至,通过此方法
 func (c *Core) Ipc(_ context.Context, req *node.IpcReq) (*node.IpcRes, error) {
-	//TODO implement me
-	panic("implement me")
+	pid := model.Pid{
+		NodeName: req.Pid.NodeName,
+		Serial:   req.Pid.Serial,
+	}
+	p, ok := c.processTable.get(pid)
+	if !ok {
+		zlog.Error(PidNotExistsErr)
+		return nil, errors.New(PidNotExistsErr)
+	}
+	p.consensus.Push(pid, req.Arg)
+	return &node.IpcRes{}, nil
 }
 
 func (c *Core) Fetch(_ context.Context, req *node.FetchReq) (*node.FetchRes, error) {

@@ -43,11 +43,16 @@ type Storage struct {
 	MysqlAddr   string `yaml:"mysqlAddr"`
 	MysqlPort   string `yaml:"mysqlPort"`
 }
+type TimeOut struct {
+	LeaderElection int64
+	ExecMaxTime    int64
+}
 
 type config struct {
 	Storage `yaml:"storage"`
 	NetWork `yaml:"netWork"`
 	Logger  `yaml:"logger"`
+	TimeOut `yaml:"timeOut"`
 }
 
 var Cfg config

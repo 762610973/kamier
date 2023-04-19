@@ -15,9 +15,7 @@ message IpcReq{
   bytes arg = 2;
 }
 // 节点间通信相应
-message IpcRes {
-  bytes res = 1;
-}
+message IpcRes {}
 
 // 准备请求
 message PrepareReq {
@@ -32,6 +30,7 @@ message PrepareRes {}
 message StartReq {
   string funcId = 1;
   Pid pid = 2;
+  repeated string members = 3;
 }
 // 启动响应
 message StartRes {}

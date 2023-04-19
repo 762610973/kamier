@@ -31,19 +31,19 @@ func newPT() *processTable {
 	return &processTable{m: sync.Map{}}
 }
 
-func (p *processTable) put(pid model.Pid, pcb *pcb) {
-	p.m.Store(pid, pcb)
+func (pT *processTable) put(pid model.Pid, pcb *pcb) {
+	pT.m.Store(pid, pcb)
 }
 
-func (p *processTable) get(pid model.Pid) (*pcb, bool) {
-	val, ok := p.m.Load(pid)
+func (pT *processTable) get(pid model.Pid) (p *pcb, ok bool) {
+	val, ok := pT.m.Load(pid)
 	if ok {
 		return val.(*pcb), true
 	}
 	return nil, false
 }
-func (p *processTable) delete(pid model.Pid) {
-	p.m.Delete(pid)
+func (pT *processTable) delete(pid model.Pid) {
+	pT.m.Delete(pid)
 }
 
 // shutdown 关闭进程

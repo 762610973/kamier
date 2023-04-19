@@ -18,24 +18,24 @@ func (f *fsm) Apply(l *raft.Log) any {
 		zlog.Error("applied data decode failed", zap.Error(err))
 		return err
 	}
-	f.pushValue(&model.ConsensusReq{
-		Site:   tmp.Site,
-		Serial: tmp.Serial,
-		Value:  tmp.Value,
+	f.pushValue(model.ConsensusReq{
+		NodeName: tmp.NodeName,
+		Serial:   tmp.Serial,
+		Value:    tmp.Value,
 	})
 	return nil
 }
 
-func (f *fsm) pushValue(req *model.ConsensusReq) {
-	zlog.Debug("push data to fsm", zap.Int32("[site]", req.Site), zap.Any("[value]", req.Value))
+func (f *fsm) pushValue(req model.ConsensusReq) {
+	zlog.Debug("push data to fsm", zap.String("[nodeName]", req.NodeName), zap.Any("[value]", req.Value))
 	f.Queue = append(f.Queue, value{
-		Site:  req.Site,
-		Value: req.Value,
+		NodeName: req.NodeName,
+		Value:    req.Value,
 	})
 	if f.Watch != nil {
 		zlog.Debug("There is a node waiting for a value")
 		// 此时正在等待的节点等到了对应节点
-		if f.Watch.site == req.Site {
+		if f.Watch.nodeName == req.NodeName {
 			// 将值发送到正在等待的节点的channel中
 			f.Watch.ch <- req.Value
 			// 更新pointer
@@ -59,10 +59,10 @@ func (f *fsm) pushValue(req *model.ConsensusReq) {
 	}
 }
 
-func (f *fsm) watchValue(targetSite int32, waiter chan model.ConsensusValue) {
-	zlog.Debug("Watch value from", zap.Int32("[targetSite]", targetSite))
+func (f *fsm) WatchValue(targetNode string, waiter chan model.ConsensusValue) {
+	zlog.Debug("Watch value from", zap.String("[targetNode]", targetNode))
 	for i := f.Pointer; i < len(f.Queue); i++ {
-		if f.Queue[i].Site == targetSite {
+		if f.Queue[i].NodeName == targetNode {
 			// 消耗一个完成标记
 			f.Pointer++
 			waiter <- f.Queue[i].Value
@@ -70,7 +70,7 @@ func (f *fsm) watchValue(targetSite int32, waiter chan model.ConsensusValue) {
 		}
 	}
 	f.Watch = &watch{
-		site: targetSite,
+		nodeName: targetNode,
 		// 传递waiter
 		ch: waiter,
 	}

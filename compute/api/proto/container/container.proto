@@ -11,8 +11,7 @@ message Pid {
 
 // 开始准备时的请求参数
 message PrepareReq {
-  string nodeName = 1;
-  int64 serial = 2;
+  Pid pid = 1;
 }
 
 // 准备完成时的响应

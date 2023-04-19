@@ -24,8 +24,8 @@ import (
 var C = NewCore()
 
 type Core struct {
-	*processTable
-	lock sync.Mutex
+	processTable *processTable
+	lock         sync.Mutex
 	node.UnimplementedNodeServiceServer
 	container.UnimplementedContainerServiceServer
 }
@@ -61,17 +61,17 @@ label:
 		errCh <- err
 	}
 	// 将当前进程插入进程表
-	c.put(pid, p)
-	go c.startContainer(pid, errCh, callback)
+	c.processTable.put(pid, p)
+	go c.startContainer(pid, errCh)
 }
 
 var isRm = flag.Bool("rm", true, "执行完之后是否删除容器")
 
 // startContainer 启动容器执行计算方法
-func (c *Core) startContainer(pid model.Pid, errCh chan error, callback chan<- *model.Output) {
+func (c *Core) startContainer(pid model.Pid, errCh chan error) {
 	flag.Parse()
 	zlog.Debug("start container...")
-	p, ok := c.get(pid)
+	p, ok := c.processTable.get(pid)
 	if !ok {
 		errCh <- errors.New("not")
 	}
@@ -126,12 +126,12 @@ func (c *Core) startContainer(pid model.Pid, errCh chan error, callback chan<- *
 
 // finish 执行完之后的结果处理
 func (c *Core) finish(pid model.Pid, output model.Output) error {
-	defer c.delete(pid)
+	defer c.processTable.delete(pid)
 	zlog.Info("container exec success")
 	if err := db.StoreOutput(pid, output); err != nil {
 		return err
 	}
-	p, ok := c.get(pid)
+	p, ok := c.processTable.get(pid)
 	// 当前进程控制块存在并且callback不为nil(异步调用时callback为nil)
 	if ok && p.callback != nil {
 		p.callback <- &output

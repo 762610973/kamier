@@ -16,10 +16,10 @@ type ConsensusValue struct {
 }
 
 type ConsensusReq struct {
-	// Site 节点号
-	Site int32
+	// NodeName 节点名
+	NodeName string
 	// Serial 序列号
-	Serial int32
+	Serial int64
 	// Value 要添加的值
 	Value ConsensusValue
 }

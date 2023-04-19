@@ -1,9 +1,11 @@
 package consensus
 
 import (
+	"compute/model"
 	"math/rand"
 	"os"
 	"strconv"
+	"time"
 
 	cfg "compute/config"
 
@@ -18,6 +20,7 @@ type Raft struct {
 	raft     *raft.Raft
 	members  []string
 	tempFile []string
+	raftAddr string
 }
 
 func NewRaft(members []string) (*Raft, error) {
@@ -82,6 +85,33 @@ func raftId(members []string) string {
 		}
 	}
 	return strconv.Itoa(res)
+}
+
+func (r *Raft) Push(pid model.Pid, arg []byte) {
+	// get leader and ipc to push value
+	for {
+		leaderAddr, leaderId := r.raft.LeaderWithID()
+		if string(leaderId) == "" {
+			//还没有选举出leader
+			time.Sleep(time.Duration(cfg.Cfg.LeaderElection) * time.Millisecond)
+		} else {
+			// leader已经选举出来了
+			// 判断是否是本节点
+			if string(leaderAddr) == r.raftAddr {
+				r.pushValue(model.ConsensusReq{
+					NodeName: "",
+					Serial:   0,
+					Value:    model.ConsensusValue{},
+				})
+				break
+			} else {
+				// request leader to pushValue
+				// TODO
+				break
+			}
+
+		}
+	}
 }
 
 const randTempPath = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"

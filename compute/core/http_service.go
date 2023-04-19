@@ -17,8 +17,9 @@ import (
 )
 
 const (
-	TimeoutErr = "There were no results for a long time"
-	OutputErr  = "Can't get output"
+	TimeoutErr      = "There were no results for a long time"
+	OutputErr       = "Can't get output"
+	PidNotExistsErr = "pid not exist in processTable"
 )
 
 // SyncCompute 同步计算处理逻辑,发起准备,启动计算

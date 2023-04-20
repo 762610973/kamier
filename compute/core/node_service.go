@@ -67,7 +67,19 @@ func (c *Core) Ipc(_ context.Context, req *node.IpcReq) (*node.IpcRes, error) {
 	return &node.IpcRes{}, nil
 }
 
+// Fetch 其他节点从本节点获取值,调用fetchValue
 func (c *Core) Fetch(_ context.Context, req *node.FetchReq) (*node.FetchRes, error) {
-	//TODO implement me
-	panic("implement me")
+	pid := model.Pid{
+		NodeName: req.Pid.NodeName,
+		Serial:   req.Pid.Serial,
+	}
+	p, ok := c.processTable.get(pid)
+	if ok {
+		v := make(chan value, 1)
+		p.prepared.fetchValue(req.Step, v)
+		defer zlog.Debug("fetch value success")
+		return &node.FetchRes{Res: <-v}, nil
+	} else {
+		return nil, errors.New("can't fetch value")
+	}
 }

@@ -67,6 +67,12 @@ label:
 
 var isRm = flag.Bool("rm", true, "执行完之后是否删除容器")
 
+const (
+	// Go podman镜像中将go链接到了/bin/中
+	Go            = "Go"
+	containerName = "kamier"
+)
+
 // startContainer 启动容器执行计算方法
 func (c *Core) startContainer(pid model.Pid, errCh chan error) {
 	flag.Parse()
@@ -97,7 +103,8 @@ func (c *Core) startContainer(pid model.Pid, errCh chan error) {
 		"-v", pwd+"socket.sock:/",
 		// TODO 工作目录
 		"-w", "",
-		"go", "run", "main.go",
+		containerName,
+		Go, "run", "main.go",
 	)
 	cmd := exec.Command("podman", cmdArgs...)
 	var stdout, stderr bytes.Buffer

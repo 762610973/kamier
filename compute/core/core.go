@@ -2,13 +2,13 @@ package core
 
 import (
 	"bytes"
+	"compute/api/proto/container"
 	"flag"
 	"os"
 	"os/exec"
 	"strconv"
 	"sync"
 
-	"compute/api/proto/container"
 	"compute/api/proto/node"
 	"compute/client"
 	cfg "compute/config"

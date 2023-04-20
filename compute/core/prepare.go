@@ -30,7 +30,7 @@ func (p *prepareValue) fetchValue(step int64, pb chan value) {
 		pb <- v
 	} else {
 		zlog.Debug("haven't prepare value")
-		if _, ok := p.senderMap[step]; !ok {
+		if _, ok = p.senderMap[step]; !ok {
 			p.senderMap[step] = make([]chan value, 0, 1)
 			p.senderMap[step] = append(p.senderMap[step], pb)
 		} else {

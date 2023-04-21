@@ -4,8 +4,6 @@ podman pull ubuntu:22.04
 podman run -dit --name=base ubuntu:22.04
 podman exec -it base apt update
 podman exec -it base apt install wget
-#podman exec -it base wget -O /usr/local/ https://studygolang.com/dl/golang/go1.20.3.linux-amd64.tar.gz
-#podman exec -it base tar -zxvf /usr/local/go1.20.3.linux-amd64.tar.gz
 podman exec -it -w /usr/local/ base wget https://studygolang.com/dl/golang/go1.20.3.linux-amd64.tar.gz
 podman exec -it -w /usr/local/ base tar -zxf go1.20.3.linux-amd64.tar.gz
 podman exec -it -w /usr/local/ base mkdir gopath

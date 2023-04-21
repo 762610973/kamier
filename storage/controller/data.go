@@ -64,7 +64,7 @@ func UpdateData(_ context.Context, c *app.RequestContext) {
 		zlog.Error("bind data object failed", zap.Error(err))
 		model.ErrResponse(c, err)
 	} else {
-		err := db.UpdateDocument(db.Data, f.Id, f)
+		err = db.UpdateDocument(db.Data, f.Id, f)
 		if err != nil {
 			zlog.Error("update data failed", zap.Error(err))
 			model.ErrResponse(c, err)

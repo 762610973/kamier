@@ -28,6 +28,11 @@ type Response struct {
 	Msg  string `json:"msg,omitempty"`
 }
 
+type Pid struct {
+	NodeName string `json:"nodeName"`
+	Serial   int64  `json:"serial"`
+}
+
 const (
 	Err     = "Failed"
 	Success = "Success"

@@ -15,6 +15,6 @@
 - proto命令
 `protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative ./目标文件`
 
-- site: int32
-
-[//]: # (  go install google.golang.org/protobuf/cmd/protoc-gen-go@latest)
+- 安装protoc
+- go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+- go install google.golang.org/grpc/cmd/protoc-gen-go-grpc

@@ -52,6 +52,11 @@ func main() {
 	h.GET("/node/get", ctl.GetNode)
 	h.GET("/node/getAllNode", ctl.GetAllNode)
 	h.DELETE("/node/delete/", ctl.DeleteNode)
+
+	// 共识端口
+	h.POST("/consensus/", ctl.GetConsensusPortNum)
+	h.DELETE("/consensus/", ctl.DeleteConsensusPortNum)
+	h.GET("/consensus/", ctl.GetAllPortNum)
 	go func() {
 		err := h.Run()
 		if err != nil {

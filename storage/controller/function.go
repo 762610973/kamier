@@ -65,7 +65,7 @@ func UpdateFunc(_ context.Context, c *app.RequestContext) {
 		zlog.Error("bind func object failed", zap.Error(err))
 		model.ErrResponse(c, err)
 	} else {
-		err := db.UpdateDocument(db.Function, f.Id, f)
+		err = db.UpdateDocument(db.Function, f.Id, f)
 		if err != nil {
 			zlog.Error("update function failed", zap.Error(err))
 			model.ErrResponse(c, err)

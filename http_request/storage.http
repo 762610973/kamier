@@ -1,0 +1,24 @@
+###
+# curl -X GET --location "http://localhost:1112/ping"
+GET http://{{host}}:1112/ping
+
+### 添加/请求 num
+POST http://{{host}}:1112/consensus/
+Content-Type: application/json
+
+{
+  "nodeName": "node1",
+  "serial": 111111
+}
+
+### 计算结束后关闭共识, 删除num
+DELETE http://{{host}}:1112/consensus/
+Content-Type: application/json
+
+{
+  "nodeName": "node2",
+  "serial": 111
+}
+
+### 查看所有的
+GET http://{{host}}:1112/consensus/

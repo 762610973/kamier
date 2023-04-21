@@ -114,6 +114,13 @@ func (r *Raft) Push(pid model.Pid, arg []byte) {
 	}
 }
 
+func (r *Raft) Watch(targetNode string) model.ConsensusValue {
+	waitCh := make(chan model.ConsensusValue, 1)
+	r.WatchValue(targetNode, waitCh)
+	defer zlog.Debug("watch value from consensus success")
+	return <-waitCh
+}
+
 const randTempPath = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 func randString(n int) string {

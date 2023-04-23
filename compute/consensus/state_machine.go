@@ -59,7 +59,7 @@ func (f *fsm) pushValue(req model.ConsensusReq) {
 	}
 }
 
-func (f *fsm) WatchValue(targetNode string, waiter chan model.ConsensusValue) {
+func (f *fsm) watchValue(targetNode string, waiter chan model.ConsensusValue) {
 	zlog.Debug("Watch value from", zap.String("[targetNode]", targetNode))
 	for i := f.Pointer; i < len(f.Queue); i++ {
 		if f.Queue[i].NodeName == targetNode {

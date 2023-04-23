@@ -63,12 +63,12 @@ func main() {
 		//优雅退出
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
-		err = h.Shutdown(ctx)
-		nodeServer.GracefulStop()
-		containerServer.GracefulStop()
-		if err != nil {
+		if err = h.Shutdown(ctx); err != nil {
 			zlog.Error("graceful shutdown failed", zap.Error(err))
 		}
+		nodeServer.GracefulStop()
+		containerServer.GracefulStop()
+		db.CloseDB()
 		zlog.Info("graceful shutdown...")
 	case e := <-errCh:
 		zlog.Error("start grpc server failed", zap.Error(e))

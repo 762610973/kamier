@@ -25,6 +25,7 @@ type pcb struct {
 	consensus *consensus.Raft
 	// 存储计算方法的临时文件路径
 	tempFilePath string
+	fnName       string
 }
 
 func newPT() *processTable {

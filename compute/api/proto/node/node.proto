@@ -12,6 +12,7 @@ message Pid {
 // 节点间通信请求参数
 message IpcReq{
   Pid pid = 1;
+
   bytes arg = 2;
 }
 // 节点间通信相应

@@ -55,7 +55,7 @@ func asyncCompute(_ context.Context, c *app.RequestContext) {
 		model.ErrResponse(c, err)
 		return
 	}
-	pid, err := service.ASyncCompute(r)
+	pid, err := core.ASyncCompute(r)
 	if err != nil {
 		zlog.Error("async compute failed", zap.Error(err))
 		model.ErrResponse(c, err)
@@ -73,7 +73,7 @@ func getOutput(_ context.Context, c *app.RequestContext) {
 		zlog.Error("bind failed", zap.Error(err))
 		return
 	}
-	output, err := service.GetOutput(p)
+	output, err := core.GetOutput(p)
 	if err != nil {
 		zlog.Error("get output by pid failed", zap.Error(err), zap.Any("pid", p))
 		model.ErrResponse(c, err)

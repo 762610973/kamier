@@ -7,7 +7,7 @@ network:
   nodeName: org1
   httpPort: 1113
 #  TODO
-  grpcAddr: 127.0.0.1
+  localAddr: 127.0.0.1
   grpcPort: 1114
   socketPath: ./sockets/socket.sock
 logger:

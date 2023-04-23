@@ -31,8 +31,8 @@ type NetWork struct {
 	NodeName string `yaml:"nodeName"`
 	HttpPort string `yaml:"httpPort"`
 
-	GrpcAddr string `yaml:"grpcAddr"`
-	GrpcPort string `yaml:"grpcPort"`
+	LocalAddr string `yaml:"grpcAddr"`
+	GrpcPort  string `yaml:"grpcPort"`
 
 	SocketPath string `yaml:"socketPath"`
 }

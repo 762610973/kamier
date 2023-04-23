@@ -12,7 +12,7 @@ const (
 // ConsensusValue 存放于共识队列上的值
 type ConsensusValue struct {
 	Type  string
-	Value any
+	Value []byte
 }
 
 type ConsensusReq struct {

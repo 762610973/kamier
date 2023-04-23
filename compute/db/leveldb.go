@@ -22,6 +22,11 @@ func InitLeveldb() {
 	}
 }
 
+func CloseDB() {
+	_ = db.Close()
+	zlog.Info("close db")
+}
+
 func StoreSerial(nodeName string, serial int64) error {
 	val := strconv.FormatInt(serial, 10)
 	if err := db.Put([]byte(nodeName), []byte(val), nil); err != nil {

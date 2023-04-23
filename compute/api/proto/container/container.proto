@@ -21,26 +21,36 @@ message PrepareRes {}
 
 message FetchReq{
   Pid pid = 1;
+  string targetName = 2;
+  string sourceName = 3;
+  int64 step = 4;
 }
 message FetchRes{
   bytes res = 1;
 }
 message AppendReq {
-  int32 Type = 1;
-  string nodeName = 2;
+  // 类型
+  string Type = 1;
+  // 值
+  bytes value = 2;
+  Pid pid = 3;
 }
 // AppendRes 添加值响应
 message AppendRes {}
-message WatchRes {}
+message WatchRes {
+  string Type = 1;
+  bytes value = 2;
+}
 
 // watch 公开值请求结构体
 message WatchReq{
-  string nodeName = 1;
-  int64 serial = 2;
-  // 目标节点号
-  int64 targetSite = 3;
-}
+  Pid pid = 1;
+  string targetName = 2;
+//  // 目标节点号
+//  string sourceName = 3;
+//  string targetName = 4;
 
+}
 
 
 service ContainerService {

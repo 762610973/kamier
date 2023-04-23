@@ -1,29 +1,37 @@
 package consensus
 
 import (
-	"compute/model"
+	"encoding/json"
+	"errors"
+	"fmt"
 	"math/rand"
+	"net"
 	"os"
 	"strconv"
 	"time"
 
+	"compute/client"
 	cfg "compute/config"
-
 	zlog "compute/log"
+	"compute/model"
+
 	"github.com/hashicorp/raft"
 	raftDb "github.com/hashicorp/raft-boltdb"
+	"github.com/imroc/req/v3"
 	"go.uber.org/zap"
 )
 
 type Raft struct {
 	*fsm
 	raft     *raft.Raft
+	pid      model.Pid
 	members  []string
 	tempFile []string
 	raftAddr string
 }
 
-func NewRaft(members []string) (*Raft, error) {
+// NewRaft new a raft node
+func NewRaft(pid model.Pid, members []string) (*Raft, error) {
 	rcfg := raft.DefaultConfig()
 
 	leaderNotifyCh := make(chan bool, 1)
@@ -31,8 +39,13 @@ func NewRaft(members []string) (*Raft, error) {
 	rcfg.NoSnapshotRestoreOnStart = false
 	rcfg.LogLevel = "ERROR"
 	rcfg.LocalID = raft.ServerID(raftId(members))
-
-	transport, err := raft.NewTCPTransport()
+	addr, err := getPort(pid, fmt.Sprintf("http://%s:%s", cfg.Cfg.LocalAddr, cfg.Cfg.GrpcPort))
+	if err != nil {
+		zlog.Error("get port failed", zap.Error(err))
+		return nil, err
+	}
+	tcpAddr, _ := net.ResolveTCPAddr("tcp", addr)
+	transport, err := raft.NewTCPTransport(tcpAddr.String(), tcpAddr, 4, 4*time.Second, os.Stderr)
 	if err != nil {
 		zlog.Error("new tcp transport failed", zap.Error(err))
 		return nil, err
@@ -63,17 +76,81 @@ func NewRaft(members []string) (*Raft, error) {
 	return &Raft{
 		raft:     rf,
 		tempFile: []string{lPath, sPath},
+		pid:      pid,
 	}, nil
 }
 
-func (r *Raft) BuildConsensus() error {
+func getPort(pid model.Pid, addr string) (string, error) {
+	addr = addr[7:]
+	host, port := "", ""
+	for i, v := range addr {
+		if v == ':' {
+			host = addr[:i]
+			port = addr[i+1:]
+		}
+	}
+	res, err := req.R().SetBodyJsonMarshal(pid).Post(cfg.Cfg.StorageUrl + "/consensus/")
+	if err != nil {
+		zlog.Error("get consensus port num failed", zap.Error(err))
+		return "", err
+	}
+	n := res.String()
+	// 获取要递增的数字
+	tempInt, err := strconv.ParseInt(n, 64, 10)
+	if err != nil {
+		zlog.Error("parse int64 failed", zap.Error(err), zap.String("int64->", n))
+		return "", err
+	}
+	// 将端口转换为数字
+	portInt, err := strconv.ParseInt(port, 64, 10)
+	if err != nil {
+		zlog.Error("parse port to int64 failed", zap.Error(err), zap.String("int64->", n))
+		return "", err
+	}
+	port = strconv.FormatInt(portInt+tempInt, 10)
+	return host + ":" + port, nil
 
+}
+
+// BuildConsensus 构建集群共识
+func (r *Raft) BuildConsensus() error {
+	zlog.Info("build consensus")
+	serverCfg := r.raft.GetConfiguration().Configuration()
+	if len(serverCfg.Servers) > 0 {
+		return errors.New("start failed, config exists")
+	}
+	for idx, node := range r.members {
+		id := strconv.Itoa(idx)
+		addr, err := getPort(r.pid, client.Nodemap.Get(node))
+		if err != nil {
+			return err
+		}
+		server := raft.Server{
+			ID:      raft.ServerID(id),
+			Address: raft.ServerAddress(addr),
+		}
+		serverCfg.Servers = append(serverCfg.Servers, server)
+	}
+	if err := r.raft.BootstrapCluster(serverCfg).Error(); err != nil {
+		zlog.Error("boot strap cluster failed", zap.Error(err))
+		return err
+	}
+	zlog.Info("build consensus success")
 	return nil
 }
 
 // ShutDown 关闭共识
 func (r *Raft) ShutDown() error {
-	return r.raft.Shutdown().Error()
+	var err error
+	for _, path := range r.tempFile {
+		err = os.Remove(path)
+		if err != nil {
+			zlog.Error("remove path failed", zap.String("path", path))
+			err = errors.Join(err)
+		}
+	}
+	err = errors.Join(r.raft.Shutdown().Error())
+	return err
 }
 
 func raftId(members []string) string {
@@ -89,6 +166,7 @@ func raftId(members []string) string {
 
 func (r *Raft) Push(pid model.Pid, arg []byte) {
 	// get leader and ipc to push value
+
 	for {
 		leaderAddr, leaderId := r.raft.LeaderWithID()
 		if string(leaderId) == "" {
@@ -98,15 +176,32 @@ func (r *Raft) Push(pid model.Pid, arg []byte) {
 			// leader已经选举出来了
 			// 判断是否是本节点
 			if string(leaderAddr) == r.raftAddr {
-				r.pushValue(model.ConsensusReq{
-					NodeName: "",
-					Serial:   0,
-					Value:    model.ConsensusValue{},
+				var v model.ConsensusValue
+				err := json.Unmarshal(arg, &v)
+				if err != nil {
+					zlog.Panic("unmarshal consensus arg failed", zap.Error(err))
+				}
+				cmd, err := json.Marshal(model.ConsensusReq{
+					NodeName: pid.NodeName,
+					Serial:   pid.Serial,
+					Value: model.ConsensusValue{
+						Type:  v.Type,
+						Value: v.Value,
+					},
 				})
+				if err != nil {
+					zlog.Error("marshal consensus value failed", zap.Error(err))
+				}
+				apply := r.raft.Apply(cmd, 4*time.Second)
+				if apply.Error() != nil {
+					zlog.Panic("raft apply failed")
+				}
 				break
 			} else {
-				// request leader to pushValue
-				// TODO
+				err := client.Ipc(string(leaderAddr), pid, arg)
+				if err != nil {
+					zlog.Error("ipc failed", zap.Error(err))
+				}
 				break
 			}
 
@@ -116,7 +211,7 @@ func (r *Raft) Push(pid model.Pid, arg []byte) {
 
 func (r *Raft) Watch(targetNode string) model.ConsensusValue {
 	waitCh := make(chan model.ConsensusValue, 1)
-	r.WatchValue(targetNode, waitCh)
+	r.watchValue(targetNode, waitCh)
 	defer zlog.Debug("watch value from consensus success")
 	return <-waitCh
 }

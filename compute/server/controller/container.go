@@ -25,6 +25,7 @@ func RunGrpcContainerServer() (cServer *grpc.Server, err error) {
 		zlog.Error("net.Listen failed", zap.Error(err))
 		return nil, err
 	}
+	// 提升文件权限
 	if err = os.Chmod(cfg.Cfg.SocketPath, 0777); err != nil {
 		zlog.Error("socket file elevate privileges failed", zap.Error(err))
 		return nil, err

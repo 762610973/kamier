@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"fmt"
+	"sync"
 
 	"compute/api/proto/node"
 	cfg "compute/config"
@@ -19,13 +20,30 @@ const (
 	getNodePath  = "/node/get"
 )
 
-var nodeMap = make(map[string]string)
+type NodeMap struct {
+	node map[string]string
+	sync.RWMutex
+}
+
+var Nodemap = NodeMap{node: map[string]string{}}
+
+func (n *NodeMap) Get(node string) string {
+	n.RLock()
+	defer n.RUnlock()
+	return n.node[node]
+}
+
+func (n *NodeMap) Put(node, host string) {
+	n.RLock()
+	defer n.RUnlock()
+	n.node[node] = host
+}
 
 // RegisterNode 启动时注册本节点地址
 func RegisterNode() error {
 	_, err := req.R().SetBodyJsonMarshal(map[string]string{
 		"name": cfg.Cfg.NodeName,
-		"addr": fmt.Sprintf("%s:%s", cfg.Cfg.GrpcAddr, cfg.Cfg.GrpcPort),
+		"addr": fmt.Sprintf("%s:%s", cfg.Cfg.LocalAddr, cfg.Cfg.GrpcPort),
 	}).Post(fmt.Sprintf("%s%s", cfg.Cfg.Storage, registerPath))
 	if err != nil {
 		return err
@@ -48,7 +66,7 @@ func GetHost(nodeName string) (string, error) {
 
 // Prepare 发起准备请求
 func Prepare(nodeName string, members []string) error {
-	clientConn, err := grpc.Dial(nodeMap[nodeName])
+	clientConn, err := grpc.Dial(Nodemap.Get(nodeName))
 	if err != nil {
 		zlog.Error(fmt.Sprintf("grpc dial %s failed", nodeName))
 		return err
@@ -67,7 +85,7 @@ func Prepare(nodeName string, members []string) error {
 
 // Start 发起启动计算的请求
 func Start(nodeName string, funcId string, pid *model.Pid) error {
-	clientConn, err := grpc.Dial(nodeMap[nodeName])
+	clientConn, err := grpc.Dial(Nodemap.Get(nodeName))
 	if err != nil {
 		zlog.Error(fmt.Sprintf("grpc dial %s failed", nodeName))
 		return err
@@ -89,10 +107,10 @@ func Start(nodeName string, funcId string, pid *model.Pid) error {
 }
 
 // Fetch 从其他节点获取值
-func Fetch(nodeName string, pid *model.Pid, targetName, sourceName string, step int64) ([]byte, error) {
-	clientConn, err := grpc.Dial(nodeMap[nodeName])
+func Fetch(pid model.Pid, targetName, sourceName string, step int64) ([]byte, error) {
+	clientConn, err := grpc.Dial(Nodemap.Get(targetName))
 	if err != nil {
-		zlog.Error(fmt.Sprintf("grpc dial %s failed", nodeName))
+		zlog.Error(fmt.Sprintf("grpc dial %s failed", targetName))
 		return nil, err
 	}
 	client := node.NewNodeServiceClient(clientConn)
@@ -114,14 +132,15 @@ func Fetch(nodeName string, pid *model.Pid, targetName, sourceName string, step 
 }
 
 // Ipc 想leader节点发起请求添加值
-func Ipc(nodeName string, pid *model.Pid, arg []byte) ([]byte, error) {
-	clientConn, err := grpc.Dial(nodeMap[nodeName])
+func Ipc(target string, pid model.Pid, arg []byte) error {
+
+	clientConn, err := grpc.Dial(target)
 	if err != nil {
-		zlog.Error(fmt.Sprintf("grpc dial %s failed", nodeName))
-		return nil, err
+		zlog.Error("grpc dial failed", zap.Error(err))
+		return err
 	}
 	client := node.NewNodeServiceClient(clientConn)
-	res, err := client.Ipc(context.Background(), &node.IpcReq{
+	_, err = client.Ipc(context.Background(), &node.IpcReq{
 		Pid: &node.Pid{
 			NodeName: pid.NodeName,
 			Serial:   pid.Serial,
@@ -130,8 +149,8 @@ func Ipc(nodeName string, pid *model.Pid, arg []byte) ([]byte, error) {
 	})
 	if err != nil {
 		zlog.Error("grpc ipc failed", zap.Error(err))
-		return nil, err
+		return err
 	}
 	zlog.Debug("grpc ipc success")
-	return res.Res, nil
+	return nil
 }

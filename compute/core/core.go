@@ -47,7 +47,7 @@ func (c *Core) StartProcess(pid model.Pid, funcId string, members []string, call
 		goto label
 	} else {
 		// 多节点参与计算
-		r, err := consensus.NewRaft(members)
+		r, err := consensus.NewRaft(pid, members)
 		if err != nil {
 			errCh <- err
 		}
@@ -62,7 +62,7 @@ label:
 	}
 	// 将当前进程插入进程表
 	c.processTable.put(pid, p)
-	go c.startContainer(pid, errCh)
+	go c.startContainer(pid, members, errCh)
 }
 
 var isRm = flag.Bool("rm", true, "执行完之后是否删除容器")
@@ -74,7 +74,7 @@ const (
 )
 
 // startContainer 启动容器执行计算方法
-func (c *Core) startContainer(pid model.Pid, errCh chan error) {
+func (c *Core) startContainer(pid model.Pid, members []string, errCh chan error) {
 	flag.Parse()
 	zlog.Debug("start container...")
 	p, ok := c.processTable.get(pid)
@@ -94,9 +94,11 @@ func (c *Core) startContainer(pid model.Pid, errCh chan error) {
 	}
 	cmdArgs = append(cmdArgs,
 		"-e", "SocketPath", cfg.Cfg.SocketPath,
-		"-e", "NodeName", cfg.Cfg.NodeName,
+		"-e", "SelfName", cfg.Cfg.NodeName,
+		"-e", "NodeName", pid.NodeName,
 		"-e", "Serial", strconv.FormatInt(pid.Serial, 10),
-		"-e", "Host", cfg.Cfg.GrpcAddr,
+		"-e", "Host", cfg.Cfg.LocalAddr,
+		"-e", "membersLength", strconv.Itoa(len(members)),
 		// 挂载的文件
 		"-v", "",
 		// sockets文件

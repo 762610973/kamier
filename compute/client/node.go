@@ -39,6 +39,12 @@ func (n *NodeMap) Put(node, host string) {
 	n.node[node] = host
 }
 
+func (n *NodeMap) Delete(node string) {
+	n.Lock()
+	defer n.Unlock()
+	delete(n.node, node)
+}
+
 // RegisterNode 启动时注册本节点地址
 func RegisterNode() error {
 	_, err := req.R().SetBodyJsonMarshal(map[string]string{

@@ -1,20 +1,34 @@
 package core
 
 import (
+	"context"
+	"fmt"
+	"time"
+
+	gclient "compute/client"
 	cfg "compute/config"
 	zlog "compute/log"
 	"compute/model"
-	"context"
-	"fmt"
-	"github.com/pkg/errors"
-	"go.uber.org/zap"
-	"time"
 
 	"compute/api/proto/node"
+	"github.com/pkg/errors"
+	"go.uber.org/zap"
 )
 
 // Prepare 参与运算的结点准备启动时校验本节点名即可
 func (c *Core) Prepare(_ context.Context, req *node.PrepareReq) (*node.PrepareRes, error) {
+	go func() {
+		for _, member := range req.Members {
+			go func(m string) {
+				host, err := gclient.GetHost(m)
+				if err != nil {
+					zlog.Error("get host failed", zap.Error(err))
+					return
+				}
+				gclient.Nodemap.Put(m, host)
+			}(member)
+		}
+	}()
 	var exist bool
 	for _, member := range req.Members {
 		if member == cfg.Cfg.NodeName {

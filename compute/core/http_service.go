@@ -41,15 +41,23 @@ func SyncCompute(req model.Request) (*model.Output, error) {
 	after := time.After(time.Second * 30)
 	defer close(callback)
 	defer close(errCh)
+	defer func() {
+		go func() {
+			for _, mem := range req.Members {
+				gclient.Nodemap.Delete(mem)
+			}
+		}()
+	}()
 	select {
 	case output := <-callback:
-		if output != nil {
-			zlog.Debug("get output success")
-			return output, nil
-		} else {
-			zlog.Warn(OutputErr)
-			return nil, errors.New(OutputErr)
-		}
+		//if output != nil {
+		//	zlog.Debug("get output success")
+		//	return output, nil
+		//} else {
+		//	zlog.Info(OutputErr)
+		//	return nil, errors.New(OutputErr)
+		//}
+		return output, nil
 	case <-after:
 		zlog.Info(TimeoutErr)
 		return nil, errors.New(TimeoutErr)
@@ -115,6 +123,18 @@ func preparePid() (pid *model.Pid, err error) {
 
 // allNodePrepare 并发请求除本节点外的所有节点,其中一个节点准备失败则本次计算失败
 func allNodePrepare(members []string) error {
+	go func() {
+		for _, member := range members {
+			go func(m string) {
+				host, err := gclient.GetHost(m)
+				if err != nil {
+					zlog.Error("get host failed", zap.Error(err))
+					return
+				}
+				gclient.Nodemap.Put(m, host)
+			}(member)
+		}
+	}()
 	var err error
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

@@ -98,7 +98,7 @@ func (c *Core) startContainer(pid model.Pid, members []string, errCh chan error)
 		"-e", "SelfName", cfg.Cfg.NodeName,
 		"-e", "NodeName", pid.NodeName,
 		"-e", "Serial", strconv.FormatInt(pid.Serial, 10),
-		"-e", "Host", cfg.Cfg.LocalAddr,
+		"-e", "Host_IP", cfg.Cfg.LocalAddr,
 		"-e", "MembersLength", strconv.Itoa(len(members)),
 		"-e", "FnName", p.fnName,
 		// 挂载的文件

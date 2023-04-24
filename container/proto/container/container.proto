@@ -1,0 +1,65 @@
+//! 定义容器内外grpc通信的接口
+syntax = "proto3";
+
+package container;
+
+option go_package = "./;container";
+message Pid {
+  string nodeName = 1;
+  int64 serial = 2;
+}
+
+// 开始准备时的请求参数
+message PrepareReq {
+  Pid pid = 1;
+  int64 step = 2;
+  bytes value = 3;
+}
+
+// 准备完成时的响应
+message PrepareRes {}
+
+message FetchReq{
+  Pid pid = 1;
+  string targetName = 2;
+  string sourceName = 3;
+  int64 step = 4;
+}
+message FetchRes{
+  bytes res = 1;
+}
+message AppendReq {
+  // 类型
+  string Type = 1;
+  // 值
+  bytes value = 2;
+  Pid pid = 3;
+}
+// AppendRes 添加值响应
+message AppendRes {}
+message WatchRes {
+  string Type = 1;
+  bytes value = 2;
+}
+
+// watch 公开值请求结构体
+message WatchReq{
+  Pid pid = 1;
+  string targetName = 2;
+//  // 目标节点号
+//  string sourceName = 3;
+//  string targetName = 4;
+
+}
+
+
+service ContainerService {
+  // 准备值
+  rpc PrepareValue(PrepareReq) returns (PrepareRes);
+  // 获取值
+  rpc FetchValue(FetchReq) returns (FetchRes);
+  // Append 添加值
+  rpc AppendValue(AppendReq) returns (AppendRes);
+  // watch完成标记
+  rpc WatchValue(WatchReq) returns (WatchRes);
+}

@@ -58,8 +58,11 @@ func (c *Core) StartProcess(pid model.Pid, funcId string, members []string, call
 		}
 	}
 label:
-	if err := client.GenerateTempFile(funcId); err != nil {
+	if m, err := client.GenerateTempFile(funcId); err != nil {
 		errCh <- err
+	} else {
+		p.tempFilePath = m[0]
+		p.fnName = m[1]
 	}
 	// 将当前进程插入进程表
 	c.processTable.put(pid, p)
@@ -102,10 +105,9 @@ func (c *Core) startContainer(pid model.Pid, members []string, errCh chan error)
 		"-e", "MembersLength", strconv.Itoa(len(members)),
 		"-e", "FnName", p.fnName,
 		// 挂载的文件
-		"-v", "",
+		//"-v", pwd+"",
 		// sockets文件
 		"-v", pwd+"socket.sock:/",
-		// TODO 工作目录
 		"-w", "",
 		imageName,
 		Go, "run", "main.go",

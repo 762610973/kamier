@@ -1,6 +1,6 @@
 storage:
-#  mongoDBAddr: 127.0.0.1
-  mongoDBAddr: 192.168.43.128
+  mongoDBAddr: 127.0.0.1
+#  mongoDBAddr: 192.168.43.128
   mongoDBPort: 27017
   dbName: storage
   delete: true

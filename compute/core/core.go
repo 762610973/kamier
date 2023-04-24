@@ -3,7 +3,6 @@ package core
 import (
 	"bytes"
 	"flag"
-	"github.com/imroc/req/v3"
 	"os"
 	"os/exec"
 	"strconv"
@@ -18,6 +17,7 @@ import (
 	zlog "compute/log"
 	"compute/model"
 
+	"github.com/imroc/req/v3"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )

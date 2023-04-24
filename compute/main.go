@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"google.golang.org/grpc"
 	"os"
 	"os/signal"
 	"strings"
@@ -15,6 +14,7 @@ import (
 	"compute/server/controller"
 
 	"go.uber.org/zap"
+	"google.golang.org/grpc"
 )
 
 func init() {
@@ -28,8 +28,8 @@ func init() {
 
 func main() {
 	h := controller.RunHttpServer()
-	var nodeServer *grpc.Server
-	var containerServer *grpc.Server
+	nodeServer := grpc.NewServer()
+	containerServer := grpc.NewServer()
 	var err error
 	go func() {
 		zlog.Info("start http server")
@@ -44,14 +44,13 @@ func main() {
 	}()
 	errCh := make(chan error, 1)
 	go func() {
-		nodeServer, err = controller.RunGrpcNodeServer()
+		err = controller.RunGrpcNodeServer(nodeServer)
 		if err != nil {
 			errCh <- err
 		}
 	}()
 	go func() {
-		//time.Sleep(time.Second * 10)
-		containerServer, err = controller.RunGrpcContainerServer()
+		err = controller.RunGrpcContainerServer(containerServer)
 		if err != nil {
 			errCh <- err
 		}

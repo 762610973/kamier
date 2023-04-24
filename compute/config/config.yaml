@@ -7,7 +7,7 @@ network:
 #  TODO
   localAddr: 127.0.0.1
   grpcPort: :1114
-  socketPath: ./sockets/socket.sock
+  socketPath: socket.sock
 logger:
   level: debug
 #  编码格式: json,console

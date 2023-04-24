@@ -20,12 +20,16 @@ func RunGrpcContainerServer() (cServer *grpc.Server, err error) {
 			return nil, err
 		}
 	}
-	listener, err := net.Listen("unix", cfg.Cfg.SocketPath)
+	zlog.Debug("delete socket file")
+	//listener, err := net.Listen("tcp", ":1115")
+	listener, err := net.ListenUnix("unix", &net.UnixAddr{
+		Name: cfg.Cfg.SocketPath,
+		Net:  "unix",
+	})
 	if err != nil {
 		zlog.Error("net.Listen failed", zap.Error(err))
 		return nil, err
 	}
-	// 提升文件权限
 	if err = os.Chmod(cfg.Cfg.SocketPath, 0777); err != nil {
 		zlog.Error("socket file elevate privileges failed", zap.Error(err))
 		return nil, err

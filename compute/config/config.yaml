@@ -1,14 +1,12 @@
 storage:
   levelDBPath: storage/db
-  mysqlAddr: 127.0.0.1:3306
-  mysqlPort: 3306
   storageUrl: http://localhost:1112
 network:
   nodeName: org1
   httpPort: 1113
 #  TODO
   localAddr: 127.0.0.1
-  grpcPort: 1114
+  grpcPort: :1114
   socketPath: ./sockets/socket.sock
 logger:
   level: debug

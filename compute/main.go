@@ -42,7 +42,7 @@ func main() {
 			}
 		}
 	}()
-	errCh := make(chan error)
+	errCh := make(chan error, 1)
 	go func() {
 		nodeServer, err = controller.RunGrpcNodeServer()
 		if err != nil {
@@ -50,6 +50,7 @@ func main() {
 		}
 	}()
 	go func() {
+		//time.Sleep(time.Second * 10)
 		containerServer, err = controller.RunGrpcContainerServer()
 		if err != nil {
 			errCh <- err
@@ -66,8 +67,8 @@ func main() {
 		if err = h.Shutdown(ctx); err != nil {
 			zlog.Error("graceful shutdown failed", zap.Error(err))
 		}
-		nodeServer.GracefulStop()
 		containerServer.GracefulStop()
+		nodeServer.GracefulStop()
 		db.CloseDB()
 		zlog.Info("graceful shutdown...")
 	case e := <-errCh:

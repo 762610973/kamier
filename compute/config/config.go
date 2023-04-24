@@ -40,8 +40,6 @@ type NetWork struct {
 type Storage struct {
 	StorageUrl  string `yaml:"storageUrl"`
 	LevelDBPath string `yaml:"levelDBPath"`
-	MysqlAddr   string `yaml:"mysqlAddr"`
-	MysqlPort   string `yaml:"mysqlPort"`
 }
 type TimeOut struct {
 	LeaderElection int64

@@ -50,7 +50,7 @@ func RegisterNode() error {
 	_, err := req.R().SetBodyJsonMarshal(map[string]string{
 		"name": cfg.Cfg.NodeName,
 		"addr": fmt.Sprintf("%s:%s", cfg.Cfg.LocalAddr, cfg.Cfg.GrpcPort),
-	}).Post(fmt.Sprintf("%s%s", cfg.Cfg.Storage, registerPath))
+	}).Post(fmt.Sprintf("%s%s", cfg.Cfg.Storage.StorageUrl, registerPath))
 	if err != nil {
 		return err
 	}

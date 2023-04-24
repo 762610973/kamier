@@ -124,15 +124,14 @@ func preparePid() (pid *model.Pid, err error) {
 // allNodePrepare 并发请求除本节点外的所有节点,其中一个节点准备失败则本次计算失败
 func allNodePrepare(members []string) error {
 	go func() {
-		for _, member := range members {
-			go func(m string) {
-				host, err := gclient.GetHost(m)
-				if err != nil {
-					zlog.Error("get host failed", zap.Error(err))
-					return
-				}
-				gclient.Nodemap.Put(m, host)
-			}(member)
+		for _, m := range members {
+			host, err := gclient.GetHost(m)
+			if err != nil {
+				zlog.Error("get host failed", zap.Error(err))
+				return
+			}
+			gclient.Nodemap.Put(m, host)
+
 		}
 	}()
 	var err error

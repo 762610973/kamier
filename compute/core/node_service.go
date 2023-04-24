@@ -47,11 +47,12 @@ func (c *Core) Prepare(_ context.Context, req *node.PrepareReq) (*node.PrepareRe
 
 // Start 参与运算的节点开始启动,不需要准备工作,直接启动即可
 func (c *Core) Start(_ context.Context, req *node.StartReq) (*node.StartRes, error) {
+	callback := make(chan *model.Output, 1)
 	errCh := make(chan error, 1)
 	c.StartProcess(model.Pid{
 		NodeName: req.Pid.NodeName,
 		Serial:   req.Pid.Serial,
-	}, req.FuncId, req.Members, nil, errCh)
+	}, req.FuncId, req.Members, callback, errCh)
 	timeout := time.After(time.Second * 30)
 	select {
 	case err := <-errCh:
@@ -59,6 +60,9 @@ func (c *Core) Start(_ context.Context, req *node.StartReq) (*node.StartRes, err
 			zlog.Error("exec failed", zap.Error(err))
 			return nil, err
 		}
+		return &node.StartRes{}, nil
+	case <-callback:
+		zlog.Info("compute complete")
 		return &node.StartRes{}, nil
 	case <-timeout:
 		zlog.Error(TimeoutErr)

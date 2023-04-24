@@ -3,6 +3,7 @@ package core
 import (
 	"bytes"
 	"flag"
+	"github.com/imroc/req/v3"
 	"os"
 	"os/exec"
 	"strconv"
@@ -69,8 +70,8 @@ var isRm = flag.Bool("rm", true, "执行完之后是否删除容器")
 
 const (
 	// Go podman镜像中将go链接到了/bin/中
-	Go            = "Go"
-	containerName = "kamier"
+	Go        = "Go"
+	imageName = "kamier"
 )
 
 // startContainer 启动容器执行计算方法
@@ -98,14 +99,15 @@ func (c *Core) startContainer(pid model.Pid, members []string, errCh chan error)
 		"-e", "NodeName", pid.NodeName,
 		"-e", "Serial", strconv.FormatInt(pid.Serial, 10),
 		"-e", "Host", cfg.Cfg.LocalAddr,
-		"-e", "membersLength", strconv.Itoa(len(members)),
+		"-e", "MembersLength", strconv.Itoa(len(members)),
+		"-e", "FnName", p.fnName,
 		// 挂载的文件
 		"-v", "",
 		// sockets文件
 		"-v", pwd+"socket.sock:/",
 		// TODO 工作目录
 		"-w", "",
-		containerName,
+		imageName,
 		Go, "run", "main.go",
 	)
 	cmd := exec.Command("podman", cmdArgs...)
@@ -135,16 +137,24 @@ func (c *Core) startContainer(pid model.Pid, members []string, errCh chan error)
 
 // finish 执行完之后的结果处理
 func (c *Core) finish(pid model.Pid, output model.Output) error {
+	var err error
 	defer c.processTable.delete(pid)
-	zlog.Info("container exec success")
-	if err := db.StoreOutput(pid, output); err != nil {
+	defer func() {
+		_, err = req.R().SetBodyJsonMarshal(pid).Delete(cfg.Cfg.StorageUrl + "/consensus/")
+		if err != nil {
+			zlog.Error("delete port num failed", zap.Error(err))
+			return
+		}
+	}()
+	zlog.Info("container exec success", zap.Any("output", output))
+	if err = db.StoreOutput(pid, output); err != nil {
 		return err
 	}
 	p, ok := c.processTable.get(pid)
 	// 当前进程控制块存在并且callback不为nil(异步调用时callback为nil)
-	if ok && p.callback != nil {
+	if ok {
 		p.callback <- &output
-		if err := p.shutdown(); err != nil {
+		if err = p.shutdown(); err != nil {
 			zlog.Warn("pcb shutdown failed", zap.Error(err))
 			return err
 		}

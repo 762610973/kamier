@@ -131,7 +131,6 @@ func allNodePrepare(members []string) error {
 				return
 			}
 			gclient.Nodemap.Put(m, host)
-
 		}
 	}()
 	var err error

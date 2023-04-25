@@ -4,5 +4,5 @@ Content-Type: application/json
 
 {
   "functionId": "1",
-  "members": ["node1"]
+  "members": ["org1"]
 }

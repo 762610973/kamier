@@ -54,7 +54,7 @@ func (p *pcb) shutdown() (err error) {
 		zlog.Error("shutdown consensus failed", zap.Error(err))
 		err = errors.Join(err)
 	}
-	if err = os.Remove(p.tempFilePath); err != nil {
+	if err = os.RemoveAll(p.tempFilePath); err != nil {
 		zlog.Error("remove temp file failed", zap.Error(err))
 		err = errors.Join(err)
 	}

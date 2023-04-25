@@ -6,7 +6,7 @@ network:
   httpPort: 1113
 #  TODO
   localAddr: 127.0.0.1
-  grpcPort: :1114
+  grpcPort: 1114
   socketPath: socket.sock
 logger:
   level: debug

@@ -22,3 +22,16 @@ Content-Type: application/json
 
 ### 查看所有的
 GET http://{{host}}:1112/consensus/
+
+
+### 增加一个函数
+
+POST http://{{host}}:1112/function/add
+Content-Type: application/json
+
+{
+  "name": "test1",
+  "id": "1",
+  "description":"第一次测试",
+  "content": "cGFja2FnZSBleGVjCgppbXBvcnQgKAoJImNvbnRhaW5lci9lbnYiCgkiY29udGFpbmVyL2Z1bmN0aW9uIgoJemxvZyAiY29udGFpbmVyL2xvZyIKCSJjb250YWluZXIvcHJvY2VzcyIKCSJmbXQiCgkiZ28udWJlci5vcmcvemFwIgopCgpmdW5jIGluaXQoKSB7CglmdW5jdGlvbi5Gbm0uUHV0KGVudi5HZXRGbk5hbWUoKSwgZG8pCn0KCmZ1bmMgZm5OMSgpIGludCB7CglyZXR1cm4gNwp9CmZ1bmMgZm5OMigpIGludCB7CglyZXR1cm4gMwp9CmZ1bmMgZG8oKSB7CgluMSA6PSBwcm9jZXNzLk5vZGV7TmFtZTogIm5vZGUxIn0KCW4yIDo9IHByb2Nlc3MuTm9kZXtOYW1lOiAibm9kZTIifQoJZjEgOj0gcHJvY2Vzcy5DYWxsQXQobjEsIGZuTjEpCglmMiA6PSBwcm9jZXNzLkNhbGxBdChuMiwgZm5OMikKCXJlczEsIGVyciA6PSBmMS5Db21wdXRlQ2FsbEF0KG4xKQoJaWYgZXJyICE9IG5pbCB7CgkJemxvZy5FcnJvcigiY29tcHV0ZSBjYWxsIGF0IG4xIGZhaWxlZCIsIHphcC5FcnJvcihlcnIpKQoJCXJldHVybgoJfQoJcmVzMiwgZXJyIDo9IGYyLkNvbXB1dGVDYWxsQXQobjEpCglpZiBlcnIgIT0gbmlsIHsKCQl6bG9nLkVycm9yKCJjb21wdXRlIGNhbGwgYXQgbjIgZmFpbGVkIiwgemFwLkVycm9yKGVycikpCgkJcmV0dXJuCgl9CglmbXQuUHJpbnQocmVzMSArIHJlczIpCn0K"
+}

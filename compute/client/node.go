@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"fmt"
+	"google.golang.org/grpc/credentials/insecure"
 	"sync"
 
 	"compute/api/proto/node"
@@ -62,7 +63,7 @@ func RegisterNode() error {
 func GetHost(nodeName string) (string, error) {
 	resp, err := req.
 		R().
-		AddQueryParams("org,").
+		AddQueryParams("name", nodeName).
 		Get(cfg.Cfg.StorageUrl + getNodePath)
 	if err != nil {
 		return "", err
@@ -72,9 +73,9 @@ func GetHost(nodeName string) (string, error) {
 
 // Prepare 发起准备请求
 func Prepare(nodeName string, members []string) error {
-	clientConn, err := grpc.Dial(Nodemap.Get(nodeName))
+	clientConn, err := grpc.Dial(Nodemap.Get(nodeName), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		zlog.Error(fmt.Sprintf("grpc dial %s failed", nodeName))
+		zlog.Error(fmt.Sprintf("grpc dial %s failed", nodeName), zap.Error(err))
 		return err
 	}
 	client := node.NewNodeServiceClient(clientConn)
@@ -91,7 +92,7 @@ func Prepare(nodeName string, members []string) error {
 
 // Start 发起启动计算的请求
 func Start(nodeName string, funcId string, pid *model.Pid) error {
-	clientConn, err := grpc.Dial(Nodemap.Get(nodeName))
+	clientConn, err := grpc.Dial(Nodemap.Get(nodeName), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		zlog.Error(fmt.Sprintf("grpc dial %s failed", nodeName))
 		return err
@@ -114,7 +115,7 @@ func Start(nodeName string, funcId string, pid *model.Pid) error {
 
 // Fetch 从其他节点获取值
 func Fetch(pid model.Pid, targetName, sourceName string, step int64) ([]byte, error) {
-	clientConn, err := grpc.Dial(Nodemap.Get(targetName))
+	clientConn, err := grpc.Dial(Nodemap.Get(targetName), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		zlog.Error(fmt.Sprintf("grpc dial %s failed", targetName))
 		return nil, err
@@ -139,8 +140,7 @@ func Fetch(pid model.Pid, targetName, sourceName string, step int64) ([]byte, er
 
 // Ipc 想leader节点发起请求添加值
 func Ipc(target string, pid model.Pid, arg []byte) error {
-
-	clientConn, err := grpc.Dial(target)
+	clientConn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		zlog.Error("grpc dial failed", zap.Error(err))
 		return err

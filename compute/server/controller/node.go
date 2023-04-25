@@ -15,7 +15,7 @@ import (
 // RunGrpcNodeServer 启动节点间grpcServer
 func RunGrpcNodeServer(gServer *grpc.Server) (err error) {
 	zlog.Debug("run grpc node server")
-	listener, err := net.Listen("tcp", cfg.Cfg.GrpcPort)
+	listener, err := net.Listen("tcp", ":"+cfg.Cfg.GrpcPort)
 	if err != nil {
 		zlog.Error("net.Listen failed", zap.Error(err))
 		return err

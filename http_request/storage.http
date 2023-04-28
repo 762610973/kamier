@@ -3,12 +3,12 @@
 GET http://{{host}}:1112/ping
 
 ### 添加/请求 num
-POST http://{{host}}:1112/consensus/
+POST http://{{test}}:1112/consensus/
 Content-Type: application/json
 
 {
-  "nodeName": "node1",
-  "serial": 111111
+  "nodeName": "org2",
+  "serial": 1
 }
 
 ### 计算结束后关闭共识, 删除num
@@ -17,7 +17,7 @@ Content-Type: application/json
 
 {
   "nodeName": "node2",
-  "serial": 111
+  "serial": 1
 }
 
 ### 查看所有的
@@ -26,12 +26,19 @@ GET http://{{host}}:1112/consensus/
 
 ### 增加一个函数
 
-POST http://{{host}}:1112/function/add
+POST http://{{test}}:1112/function/add
 Content-Type: application/json
 
+//{
+//  "name": "test1",
+//  "id": "1",
+//  "description":"第一次测试",
+//  "content": "cGFja2FnZSB0ZXN0MQoKaW1wb3J0ICgKCSJjb250YWluZXIvZW52IgoJImNvbnRhaW5lci9mdW5jdGlvbiIKCXpsb2cgImNvbnRhaW5lci9sb2ciCgkiY29udGFpbmVyL3Byb2Nlc3MiCgkiZm10IgoJImdvLnViZXIub3JnL3phcCIKKQoKZnVuYyBpbml0KCkgewoJZnVuY3Rpb24uRm5tLlB1dChlbnYuR2V0Rm5OYW1lKCksIGRvKQp9CgpmdW5jIGZuTjEoKSBpbnQgewoJcmV0dXJuIDcKfQpmdW5jIGZuTjIoKSBpbnQgewoJcmV0dXJuIDMKfQpmdW5jIGRvKCkgewoJbjEgOj0gcHJvY2Vzcy5Ob2Rle05hbWU6ICJvcmcxIn0KCW4yIDo9IHByb2Nlc3MuTm9kZXtOYW1lOiAib3JnMiJ9CglmMSA6PSBwcm9jZXNzLkNhbGxBdChuMSwgZm5OMSkKCWYyIDo9IHByb2Nlc3MuQ2FsbEF0KG4yLCBmbk4yKQoJcmVzMSwgZXJyIDo9IGYxLkNvbXB1dGVDYWxsQXQobjEpCglpZiBlcnIgIT0gbmlsIHsKCQl6bG9nLkVycm9yKCJjb21wdXRlIGNhbGwgYXQgbjEgZmFpbGVkIiwgemFwLkVycm9yKGVycikpCgkJcmV0dXJuCgl9CglyZXMyLCBlcnIgOj0gZjIuQ29tcHV0ZUNhbGxBdChuMSkKCWlmIGVyciAhPSBuaWwgewoJCXpsb2cuRXJyb3IoImNvbXB1dGUgY2FsbCBhdCBuMiBmYWlsZWQiLCB6YXAuRXJyb3IoZXJyKSkKCQlyZXR1cm4KCX0KCWZtdC5QcmludChyZXMxICsgcmVzMikKfQo="
+//}
+
 {
-  "name": "test1",
-  "id": "1",
-  "description":"第一次测试",
-  "content": "cGFja2FnZSBleGVjCgppbXBvcnQgKAoJImNvbnRhaW5lci9lbnYiCgkiY29udGFpbmVyL2Z1bmN0aW9uIgoJemxvZyAiY29udGFpbmVyL2xvZyIKCSJjb250YWluZXIvcHJvY2VzcyIKCSJmbXQiCgkiZ28udWJlci5vcmcvemFwIgopCgpmdW5jIGluaXQoKSB7CglmdW5jdGlvbi5Gbm0uUHV0KGVudi5HZXRGbk5hbWUoKSwgZG8pCn0KCmZ1bmMgZm5OMSgpIGludCB7CglyZXR1cm4gNwp9CmZ1bmMgZm5OMigpIGludCB7CglyZXR1cm4gMwp9CmZ1bmMgZG8oKSB7CgluMSA6PSBwcm9jZXNzLk5vZGV7TmFtZTogIm5vZGUxIn0KCW4yIDo9IHByb2Nlc3MuTm9kZXtOYW1lOiAibm9kZTIifQoJZjEgOj0gcHJvY2Vzcy5DYWxsQXQobjEsIGZuTjEpCglmMiA6PSBwcm9jZXNzLkNhbGxBdChuMiwgZm5OMikKCXJlczEsIGVyciA6PSBmMS5Db21wdXRlQ2FsbEF0KG4xKQoJaWYgZXJyICE9IG5pbCB7CgkJemxvZy5FcnJvcigiY29tcHV0ZSBjYWxsIGF0IG4xIGZhaWxlZCIsIHphcC5FcnJvcihlcnIpKQoJCXJldHVybgoJfQoJcmVzMiwgZXJyIDo9IGYyLkNvbXB1dGVDYWxsQXQobjEpCglpZiBlcnIgIT0gbmlsIHsKCQl6bG9nLkVycm9yKCJjb21wdXRlIGNhbGwgYXQgbjIgZmFpbGVkIiwgemFwLkVycm9yKGVycikpCgkJcmV0dXJuCgl9CglmbXQuUHJpbnQocmVzMSArIHJlczIpCn0K"
+  "name": "exec1",
+  "id": "2",
+  "description": "第三次测试",
+  "content": "cGFja2FnZSBleGVjMQoKaW1wb3J0ICgKCSJjb250YWluZXIvZW52IgoJImNvbnRhaW5lci9mdW5jdGlvbiIKCXpsb2cgImNvbnRhaW5lci9sb2ciCgkiY29udGFpbmVyL3Byb2Nlc3MiCgkiZm10IgoJImdvLnViZXIub3JnL3phcCIKKQoKZnVuYyBpbml0KCkgewoJemxvZy5JbmZvKCJpbml0IGNvbXB1dGUgZmlsZSwgcHV0IGZ1bmMgdG8gZnVuY3Rpb24gbWFwIikKCWZ1bmN0aW9uLkZubS5QdXQoZW52LkdldEZuTmFtZSgpLCBkbykKfQoKZnVuYyBmbk4xKCkgaW50IHsKCXJldHVybiA3Cn0KZnVuYyBmbk4yKCkgaW50IHsKCXJldHVybiAzCn0KZnVuYyBkbygpIHsKCW4xIDo9IHByb2Nlc3MuTm9kZXtOYW1lOiAibm9kZTEifQoJbjIgOj0gcHJvY2Vzcy5Ob2Rle05hbWU6ICJub2RlMiJ9CglmMSA6PSBwcm9jZXNzLkNhbGxBdChuMSwgZm5OMSkKCWYyIDo9IHByb2Nlc3MuQ2FsbEF0KG4yLCBmbk4yKQoJcmVzMSwgZXJyIDo9IGYxLkNvbXB1dGVDYWxsQXQobjEpCglpZiBlcnIgIT0gbmlsIHsKCQl6bG9nLkVycm9yKCJjb21wdXRlIGNhbGwgYXQgbjEgZmFpbGVkIiwgemFwLkVycm9yKGVycikpCgkJcmV0dXJuCgl9CglyZXMyLCBlcnIgOj0gZjIuQ29tcHV0ZUNhbGxBdChuMSkKCWlmIGVyciAhPSBuaWwgewoJCXpsb2cuRXJyb3IoImNvbXB1dGUgY2FsbCBhdCBuMiBmYWlsZWQiLCB6YXAuRXJyb3IoZXJyKSkKCQlyZXR1cm4KCX0KCWZtdC5QcmludChyZXMxICsgcmVzMikKfQo="
 }

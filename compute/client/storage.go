@@ -57,7 +57,7 @@ func GenerateTempFile(funcId string) ([2]string, error) {
 	if err != nil {
 		zlog.Error("mkdir package failed", zap.Error(err))
 	}
-	tempPath = "../container/" + m[1] + "/" + m[1] + ".go"
+	tempPath = "../containers/" + m[1] + "/" + m[1] + ".go"
 	//tempPath = "../container/exec/" + m[1] + ".go"
 	file, err := os.Create(tempPath)
 	if err != nil {

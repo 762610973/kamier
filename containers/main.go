@@ -6,12 +6,17 @@ import (
 	"container/env"
 	"container/function"
 	"container/log"
+	"go.uber.org/zap"
 )
 
 func init() {
 	config.InitConfig()
 	log.InitLogger()
-	_ = client.InitClient()
+	env.InitPid()
+	err := client.InitClient()
+	if err != nil {
+		log.Error("init client failed", zap.Error(err))
+	}
 }
 
 func main() {

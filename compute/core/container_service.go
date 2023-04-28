@@ -23,6 +23,7 @@ func (c *Core) PrepareValue(_ context.Context, req *container.PrepareReq) (*cont
 		p.prepared.prepareValue(req.Step, req.Value)
 		return &container.PrepareRes{}, nil
 	} else {
+		zlog.Error("not found process")
 		return nil, errors.New("not found process")
 	}
 }

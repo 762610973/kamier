@@ -91,7 +91,7 @@ func Prepare(nodeName string, members []string) error {
 }
 
 // Start 发起启动计算的请求
-func Start(nodeName string, funcId string, pid *model.Pid) error {
+func Start(nodeName string, funcId string, pid *model.Pid, members []string) error {
 	clientConn, err := grpc.Dial(Nodemap.Get(nodeName), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		zlog.Error(fmt.Sprintf("grpc dial %s failed", nodeName))
@@ -104,6 +104,7 @@ func Start(nodeName string, funcId string, pid *model.Pid) error {
 			NodeName: pid.NodeName,
 			Serial:   pid.Serial,
 		},
+		Members: members,
 	})
 	if err != nil {
 		zlog.Error("grpc start failed", zap.Error(err))

@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/cloudwego/hertz v0.6.0
 	github.com/fsnotify/fsnotify v1.6.0
-	github.com/hashicorp/raft v1.4.0
+	github.com/hashicorp/raft v1.5.0
 	github.com/hashicorp/raft-boltdb v0.0.0-20230125174641-2a8082862702
 	github.com/imroc/req/v3 v3.33.2
 	github.com/natefinch/lumberjack v2.0.0+incompatible

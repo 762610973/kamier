@@ -18,7 +18,11 @@ import (
 var portMap = sync.Map{}
 
 // portNum 共识地址的端口后增加的数字
-var portNum = atomic.Int64{}
+var portNum = &atomic.Int64{}
+
+func init() {
+	portNum.Add(100)
+}
 
 // GetConsensusPortNum 获取共识端口要递增的数字
 func GetConsensusPortNum(_ context.Context, c *app.RequestContext) {
@@ -35,7 +39,7 @@ func GetConsensusPortNum(_ context.Context, c *app.RequestContext) {
 	}
 	v, _ := portMap.Load(p)
 	n := strconv.FormatInt(v.(int64), 10)
-	zlog.Info("return port add num:" + n)
+	zlog.Info("return port add num:"+n, zap.Any("pid", p))
 	c.String(consts.StatusOK, n)
 }
 

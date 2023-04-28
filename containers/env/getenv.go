@@ -1,7 +1,8 @@
 package env
 
 import (
-	zlog "container/log"
+	zlog "containers/log"
+	"go.uber.org/zap"
 	"os"
 	"strconv"
 )
@@ -17,31 +18,42 @@ const (
 )
 
 func GetSelfName() string {
-	return os.Getenv(selfName)
+	name := os.Getenv(selfName)
+	zlog.Info("get self name: " + name)
+	return name
 }
 
 func GetSocketPath() string {
-	return os.Getenv(socketPath)
+	addr := os.Getenv(socketPath)
+	zlog.Info("get socket path: " + addr)
+	return addr
 }
 
 func GetSerial() int64 {
-	serial := os.Getenv(serial)
-	i, err := strconv.ParseInt(serial, 64, 10)
+	s := os.Getenv(serial)
+	i, err := strconv.Atoi(s)
 	if err != nil {
+		zlog.Error("get serial failed", zap.Error(err))
 		return -1
 	}
-	return i
+	return int64(i)
 }
 
 func GetNodeName() string {
-	return os.Getenv(nodeName)
+	name := os.Getenv(nodeName)
+	zlog.Info("get node name: " + name)
+	return name
 }
 func GetFnName() string {
-	return os.Getenv(fnName)
+	f := os.Getenv(fnName)
+	zlog.Info("get fn name: " + f)
+	return f
 }
 
 func GetMembersLength() string {
-	return os.Getenv(membersLength)
+	l := os.Getenv(membersLength)
+	zlog.Info("membersLength = " + l)
+	return l
 }
 
 func GetHostIp() string {

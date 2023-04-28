@@ -3,10 +3,11 @@ package client
 import (
 	"context"
 	"go.uber.org/zap"
+	"google.golang.org/grpc/credentials/insecure"
 
-	"container/env"
-	zlog "container/log"
-	"container/proto/container"
+	"containers/env"
+	zlog "containers/log"
+	"containers/proto/container"
 
 	"google.golang.org/grpc"
 )
@@ -15,7 +16,7 @@ var client container.ContainerServiceClient
 
 func InitClient() (err error) {
 	var clientConn *grpc.ClientConn
-	clientConn, err = grpc.Dial(env.GetHostIp())
+	clientConn, err = grpc.Dial("unix:"+env.GetSocketPath(), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		zlog.Error("grpc dial failed", zap.Error(err))
 		return err

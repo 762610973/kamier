@@ -1,15 +1,16 @@
 package exec
 
 import (
-	"container/env"
-	"container/function"
-	zlog "container/log"
-	"container/process"
+	"containers/env"
+	"containers/function"
+	zlog "containers/log"
+	"containers/process"
 	"fmt"
 	"go.uber.org/zap"
 )
 
 func init() {
+	zlog.Info("init compute file, put func to function map")
 	function.Fnm.Put(env.GetFnName(), do)
 }
 

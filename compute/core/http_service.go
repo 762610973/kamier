@@ -1,18 +1,15 @@
 package core
 
 import (
-	"context"
-	"fmt"
-	"sync"
-	"time"
-
 	gclient "compute/client"
 	"compute/config"
 	"compute/db"
 	zlog "compute/log"
 	"compute/model"
+	"context"
+	"fmt"
+	"sync"
 
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
 
@@ -38,33 +35,12 @@ func SyncCompute(req model.Request) (*model.Output, error) {
 	callback := make(chan *model.Output, 1)
 	errCh := make(chan error, 1)
 	C.StartProcess(*pid, req.FunctionId, req.Members, callback, errCh)
-	after := time.After(time.Second * 30)
-	defer close(callback)
-	defer close(errCh)
-	defer func() {
-		go func() {
-			for _, mem := range req.Members {
-				gclient.Nodemap.Delete(mem)
-			}
-		}()
-	}()
-	select {
-	case output := <-callback:
-		//if output != nil {
-		//	zlog.Debug("get output success")
-		//	return output, nil
-		//} else {
-		//	zlog.Info(OutputErr)
-		//	return nil, errors.New(OutputErr)
-		//}
-		return output, nil
-	case <-after:
-		zlog.Info(TimeoutErr)
-		return nil, errors.New(TimeoutErr)
-	case err = <-errCh:
-		zlog.Error("exec failed", zap.Error(err))
+	if <-errCh != nil {
+		zlog.Error("start process failed", zap.Error(err))
 		return nil, err
 	}
+	result := <-callback
+	return result, nil
 
 }
 
@@ -123,16 +99,13 @@ func preparePid() (pid *model.Pid, err error) {
 
 // allNodePrepare 并发请求除本节点外的所有节点,其中一个节点准备失败则本次计算失败
 func allNodePrepare(members []string) error {
-	go func() {
-		for _, m := range members {
-			host, err := gclient.GetHost(m)
-			if err != nil {
-				zlog.Error("get host failed", zap.Error(err))
-				return
-			}
-			gclient.Nodemap.Put(m, host)
+	for _, m := range members {
+		host, err := gclient.GetHost(m)
+		if err != nil {
+			zlog.Error("get host failed", zap.Error(err))
 		}
-	}()
+		gclient.Nodemap.Put(m, host)
+	}
 	var err error
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -154,9 +127,9 @@ func allNodePrepare(members []string) error {
 			}
 		}(member, doneCh[index])
 	}
-	for idx, done := range doneCh {
+	for idx, d := range doneCh {
 		select {
-		case <-done:
+		case <-d:
 			continue
 		case <-ctx.Done():
 			zlog.Warn(members[idx]+"prepare failed", zap.Error(err))
@@ -176,7 +149,7 @@ func allNodeStart(members []string, funcId string, pid *model.Pid) {
 		go func(member string) {
 			defer wg.Done()
 			if member != config.Cfg.NodeName {
-				err = gclient.Start(member, funcId, pid)
+				err = gclient.Start(member, funcId, pid, members)
 				if err != nil {
 					zlog.Error("start failed", zap.Error(err))
 				}
@@ -184,5 +157,4 @@ func allNodeStart(members []string, funcId string, pid *model.Pid) {
 		}(member)
 	}
 	wg.Wait()
-	zlog.Debug("all node begin start")
 }

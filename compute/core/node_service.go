@@ -1,14 +1,12 @@
 package core
 
 import (
-	"context"
-	"fmt"
-	"time"
-
 	gclient "compute/client"
 	cfg "compute/config"
 	zlog "compute/log"
 	"compute/model"
+	"context"
+	"fmt"
 
 	"compute/api/proto/node"
 	"github.com/pkg/errors"
@@ -47,27 +45,20 @@ func (c *Core) Prepare(_ context.Context, req *node.PrepareReq) (*node.PrepareRe
 
 // Start 参与运算的节点开始启动,不需要准备工作,直接启动即可
 func (c *Core) Start(_ context.Context, req *node.StartReq) (*node.StartRes, error) {
-	callback := make(chan *model.Output, 1)
 	errCh := make(chan error, 1)
 	c.StartProcess(model.Pid{
 		NodeName: req.Pid.NodeName,
 		Serial:   req.Pid.Serial,
-	}, req.FuncId, req.Members, callback, errCh)
-	timeout := time.After(time.Second * 30)
-	select {
-	case err := <-errCh:
-		if err != nil {
-			zlog.Error("exec failed", zap.Error(err))
-			return nil, err
-		}
+	}, req.FuncId, req.Members, nil, errCh)
+	err := <-errCh
+	if err != nil {
+		zlog.Error("[slave] start process failed", zap.Error(err))
+		return nil, err
+	} else {
+		zlog.Debug("[slave] start process success")
 		return &node.StartRes{}, nil
-	case <-callback:
-		zlog.Info("compute complete")
-		return &node.StartRes{}, nil
-	case <-timeout:
-		zlog.Error(TimeoutErr)
-		return nil, errors.New(TimeoutErr)
 	}
+
 }
 
 // Ipc 容器内程序向共识队列中添加至,通过此方法

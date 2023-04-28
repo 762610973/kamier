@@ -1,8 +1,8 @@
 ###
-POST http://localhost:1113/syncCompute
+POST http://{{test}}:1113/syncCompute
 Content-Type: application/json
 
 {
-  "functionId": "1",
-  "members": ["org1"]
+  "functionId": "2",
+  "members": ["org1","org2"]
 }

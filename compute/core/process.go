@@ -2,7 +2,6 @@ package core
 
 import (
 	"errors"
-	"os"
 	"sync"
 
 	"compute/consensus"
@@ -54,9 +53,9 @@ func (p *pcb) shutdown() (err error) {
 		zlog.Error("shutdown consensus failed", zap.Error(err))
 		err = errors.Join(err)
 	}
-	if err = os.RemoveAll(p.tempFilePath); err != nil {
-		zlog.Error("remove temp file failed", zap.Error(err))
-		err = errors.Join(err)
-	}
-	return err
+	//if err = os.RemoveAll(p.tempFilePath); err != nil {
+	//	zlog.Error("remove temp compute file failed", zap.Error(err))
+	//	err = errors.Join(err)
+	//}
+	return nil
 }

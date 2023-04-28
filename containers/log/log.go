@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	cfg "container/config"
+	cfg "containers/config"
 
 	"github.com/natefinch/lumberjack"
 	"go.uber.org/zap"
@@ -75,12 +75,18 @@ func InitLogger() {
 	zap.LevelEnablerFunc(func(level zapcore.Level) bool {
 		return level >= zap.DebugLevel
 	})(level)
-	fe := fileEncoder()
-	std := stdEncoder()
-	core := zapcore.NewTee(
-		zapcore.NewCore(std, zapcore.AddSync(os.Stdout), level),
-		zapcore.NewCore(fe, getLogWriter(), level),
-	)
+	var core zapcore.Core
+	if cfg.Cfg.WriteConsole {
+		std := stdEncoder()
+		fe := fileEncoder()
+		core = zapcore.NewTee(
+			zapcore.NewCore(std, zapcore.AddSync(os.Stdout), level),
+			zapcore.NewCore(fe, getLogWriter(), level),
+		)
+	} else {
+		fe := fileEncoder()
+		core = zapcore.NewCore(fe, getLogWriter(), level)
+	}
 	log = zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
 }
 

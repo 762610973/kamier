@@ -1,13 +1,15 @@
 package log
 
 import (
+	"os"
+	"strings"
+	"time"
+
+	cfg "storage/config"
+
 	"github.com/natefinch/lumberjack"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"os"
-	cfg "storage/config"
-	"strings"
-	"time"
 )
 
 func getLogWriter() zapcore.WriteSyncer {

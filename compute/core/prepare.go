@@ -1,8 +1,9 @@
 package core
 
 import (
-	zlog "compute/log"
 	"sync"
+
+	zlog "compute/log"
 )
 
 type value []byte

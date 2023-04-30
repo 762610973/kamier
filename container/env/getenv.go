@@ -1,10 +1,12 @@
 package env
 
 import (
-	zlog "container/log"
-	"go.uber.org/zap"
 	"os"
 	"strconv"
+
+	zlog "container/log"
+
+	"go.uber.org/zap"
 )
 
 const (

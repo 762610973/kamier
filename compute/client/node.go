@@ -3,7 +3,6 @@ package client
 import (
 	"context"
 	"fmt"
-	"google.golang.org/grpc/credentials/insecure"
 	"sync"
 	"time"
 
@@ -15,6 +14,7 @@ import (
 	"github.com/imroc/req/v3"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 const (

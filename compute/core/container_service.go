@@ -1,15 +1,16 @@
 package core
 
 import (
+	"context"
+	"encoding/json"
+
 	"compute/client"
 	zlog "compute/log"
 	"compute/model"
-	"context"
-	"encoding/json"
-	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
 	"compute/api/proto/container"
+	"github.com/pkg/errors"
+	"go.uber.org/zap"
 )
 
 // PrepareValue 容器内服务准备值,存放到prepareValue结构中

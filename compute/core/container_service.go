@@ -14,12 +14,14 @@ import (
 
 // PrepareValue 容器内服务准备值,存放到prepareValue结构中
 func (c *Core) PrepareValue(_ context.Context, req *container.PrepareReq) (*container.PrepareRes, error) {
+	zlog.Debug("[container] prepare value")
 	pid := model.Pid{
 		NodeName: req.Pid.NodeName,
 		Serial:   req.Pid.Serial,
 	}
 	p, ok := c.processTable.get(pid)
 	if ok {
+		zlog.Debug("[container] prepare value")
 		p.prepared.prepareValue(req.Step, req.Value)
 		return &container.PrepareRes{}, nil
 	} else {
@@ -30,6 +32,7 @@ func (c *Core) PrepareValue(_ context.Context, req *container.PrepareReq) (*cont
 
 // FetchValue 容器内的服务获取其他节点内容器里的值
 func (c *Core) FetchValue(_ context.Context, req *container.FetchReq) (*container.FetchRes, error) {
+	zlog.Debug("[container] fetch value, request target node", zap.String("target", req.TargetName), zap.String("source", req.SourceName))
 	pid := model.Pid{
 		NodeName: req.Pid.NodeName,
 		Serial:   req.Pid.Serial,
@@ -44,19 +47,24 @@ func (c *Core) FetchValue(_ context.Context, req *container.FetchReq) (*containe
 
 // AppendValue 容器内服务向共识队列中添加值
 func (c *Core) AppendValue(_ context.Context, req *container.AppendReq) (*container.AppendRes, error) {
+	zlog.Debug("[container] append value")
 	pid := model.Pid{
 		NodeName: req.Pid.NodeName,
 		Serial:   req.Pid.Serial,
 	}
 	p, ok := c.processTable.get(pid)
 	if !ok {
+		zlog.Warn("container append value failed, not found pid...")
 		return nil, errors.New("pid not found")
 	} else {
-		v := model.ConsensusValue{
-			Type:  req.Type,
-			Value: req.Value,
+		consensusReq := model.ConsensusReq{
+			NodeName: req.SenderName,
+			Value: model.ConsensusValue{
+				Type:  req.Type,
+				Value: req.Value,
+			},
 		}
-		arg, err := json.Marshal(v)
+		arg, err := json.Marshal(consensusReq)
 		if err != nil {
 			zlog.Error("marshal consensus value failed", zap.Error(err))
 			return nil, err
@@ -69,12 +77,14 @@ func (c *Core) AppendValue(_ context.Context, req *container.AppendReq) (*contai
 }
 
 func (c *Core) WatchValue(_ context.Context, req *container.WatchReq) (*container.WatchRes, error) {
+	zlog.Debug("container watch value")
 	pid := model.Pid{
 		NodeName: req.Pid.NodeName,
 		Serial:   req.Pid.Serial,
 	}
 	p, ok := c.processTable.get(pid)
 	if !ok {
+		zlog.Error("pid not found")
 		return nil, errors.New("pid not found")
 	}
 	res := p.consensus.Watch(req.TargetName)

@@ -1,7 +1,6 @@
 package consensus
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"math/rand"
@@ -72,7 +71,8 @@ func NewRaft(pid model.Pid, members []string) (*Raft, error) {
 		zlog.Error("new stable store failed", zap.Error(err))
 		return nil, err
 	}
-	rf, err := raft.NewRaft(rcfg, newFsm(), logStore, stableStore, snapshotStore, transport)
+	f := newFsm()
+	rf, err := raft.NewRaft(rcfg, f, logStore, stableStore, snapshotStore, transport)
 	if err != nil {
 		zlog.Error("new raft failed", zap.Error(err))
 		return nil, err
@@ -83,6 +83,8 @@ func NewRaft(pid model.Pid, members []string) (*Raft, error) {
 		tempFile: []string{lPath + temp, sPath + temp},
 		pid:      pid,
 		members:  members,
+		fsm:      f,
+		raftAddr: addr,
 	}, nil
 }
 
@@ -163,8 +165,15 @@ func (r *Raft) ShutDown() error {
 			err = errors.Join(err)
 		}
 	}
-	err = errors.Join(r.raft.Shutdown().Error())
-	return err
+	err = r.raft.Shutdown().Error()
+	if err != nil {
+		zlog.Error("shutdown consensus failed", zap.Error(err))
+		err = errors.Join(err)
+	}
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func getRaftId(members []string) string {
@@ -177,40 +186,30 @@ func getRaftId(members []string) string {
 }
 
 func (r *Raft) Push(pid model.Pid, arg []byte) {
-	// get leader and ipc to push value
-
 	for {
 		leaderAddr, leaderId := r.raft.LeaderWithID()
 		if string(leaderId) == "" {
-			//还没有选举出leader
+			zlog.Debug("leader is coming")
 			time.Sleep(time.Duration(cfg.Cfg.LeaderElection) * time.Millisecond)
 		} else {
 			// leader已经选举出来了
 			// 判断是否是本节点
 			if string(leaderAddr) == r.raftAddr {
-				var v model.ConsensusValue
-				err := json.Unmarshal(arg, &v)
-				if err != nil {
-					zlog.Panic("unmarshal consensus arg failed", zap.Error(err))
-				}
-				cmd, err := json.Marshal(model.ConsensusReq{
-					NodeName: pid.NodeName,
-					Serial:   pid.Serial,
-					Value: model.ConsensusValue{
-						Type:  v.Type,
-						Value: v.Value,
-					},
-				})
-				if err != nil {
-					zlog.Error("marshal consensus value failed", zap.Error(err))
-				}
-				apply := r.raft.Apply(cmd, 4*time.Second)
+				zlog.Debug("self node is leader")
+				apply := r.raft.Apply(arg, 4*time.Second)
 				if apply.Error() != nil {
 					zlog.Panic("raft apply failed")
 				}
 				break
 			} else {
-				err := client.Ipc(string(leaderAddr), pid, arg)
+				zlog.Debug("self node is not leader")
+				s := string(leaderId)
+				id, err := strconv.Atoi(s)
+				if err != nil {
+					zlog.Error("convert string to int failed", zap.Error(err))
+				}
+				leaderName := r.members[id-1]
+				err = client.Ipc(leaderName, pid, arg)
 				if err != nil {
 					zlog.Error("ipc failed", zap.Error(err))
 				}
@@ -222,9 +221,10 @@ func (r *Raft) Push(pid model.Pid, arg []byte) {
 }
 
 func (r *Raft) Watch(targetNode string) model.ConsensusValue {
+	zlog.Debug("watch value", zap.String("targetNode", targetNode))
 	waitCh := make(chan model.ConsensusValue, 1)
-	r.watchValue(targetNode, waitCh)
-	defer zlog.Debug("watch value from consensus success")
+	r.fsm.watchValue(targetNode, waitCh)
+	zlog.Debug("watch value from consensus")
 	return <-waitCh
 }
 

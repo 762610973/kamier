@@ -20,14 +20,13 @@ func (f *fsm) Apply(l *raft.Log) any {
 	}
 	f.pushValue(model.ConsensusReq{
 		NodeName: tmp.NodeName,
-		Serial:   tmp.Serial,
 		Value:    tmp.Value,
 	})
 	return nil
 }
 
 func (f *fsm) pushValue(req model.ConsensusReq) {
-	zlog.Debug("push data to fsm", zap.String("[nodeName]", req.NodeName), zap.Any("[value]", req.Value))
+	zlog.Debug("push data to fsm", zap.String("[nodeName]", req.NodeName), zap.Any("[value]", string(req.Value.Value)))
 	f.Queue = append(f.Queue, value{
 		NodeName: req.NodeName,
 		Value:    req.Value,
@@ -60,12 +59,14 @@ func (f *fsm) pushValue(req model.ConsensusReq) {
 }
 
 func (f *fsm) watchValue(targetNode string, waiter chan model.ConsensusValue) {
-	zlog.Debug("Watch value from", zap.String("[targetNode]", targetNode))
+	zlog.Debug("watch value from: " + targetNode)
 	for i := f.Pointer; i < len(f.Queue); i++ {
 		if f.Queue[i].NodeName == targetNode {
 			// 消耗一个完成标记
 			f.Pointer++
+			zlog.Debug("match node name success")
 			waiter <- f.Queue[i].Value
+			zlog.Debug("get value success")
 			return
 		}
 	}

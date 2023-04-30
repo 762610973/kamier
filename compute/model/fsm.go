@@ -18,8 +18,6 @@ type ConsensusValue struct {
 type ConsensusReq struct {
 	// NodeName 节点名
 	NodeName string
-	// Serial 序列号
-	Serial int64
 	// Value 要添加的值
 	Value ConsensusValue
 }

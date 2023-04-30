@@ -34,7 +34,7 @@ type NetWork struct {
 	LocalAddr string `yaml:"grpcAddr"`
 	GrpcPort  string `yaml:"grpcPort"`
 
-	SocketPath string `yaml:"socketPath"`
+	ContainerAddr string `yaml:"containerAddr"`
 }
 
 type Storage struct {

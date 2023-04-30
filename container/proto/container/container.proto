@@ -34,6 +34,7 @@ message AppendReq {
   // 值
   bytes value = 2;
   Pid pid = 3;
+  string SenderName = 4;
 }
 // AppendRes 添加值响应
 message AppendRes {}

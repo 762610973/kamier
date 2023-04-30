@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"google.golang.org/grpc/credentials/insecure"
 	"sync"
+	"time"
 
 	"compute/api/proto/node"
 	cfg "compute/config"
@@ -141,18 +142,17 @@ func Fetch(pid model.Pid, targetName, sourceName string, step int64) ([]byte, er
 
 // Ipc 想leader节点发起请求添加值
 func Ipc(target string, pid model.Pid, arg []byte) error {
-	clientConn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+	clientConn, err := grpc.DialContext(ctx, Nodemap.Get(target), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		zlog.Error("grpc dial failed", zap.Error(err))
 		return err
 	}
 	client := node.NewNodeServiceClient(clientConn)
 	_, err = client.Ipc(context.Background(), &node.IpcReq{
-		Pid: &node.Pid{
-			NodeName: pid.NodeName,
-			Serial:   pid.Serial,
-		},
-		Arg: arg,
+		NodeName: pid.NodeName,
+		Serial:   pid.Serial,
+		Arg:      arg,
 	})
 	if err != nil {
 		zlog.Error("grpc ipc failed", zap.Error(err))

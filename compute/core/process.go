@@ -1,14 +1,10 @@
 package core
 
 import (
-	"errors"
 	"sync"
 
 	"compute/consensus"
-	zlog "compute/log"
 	"compute/model"
-
-	"go.uber.org/zap"
 )
 
 // processTable 进程表,key: pid;value: pcb
@@ -23,8 +19,7 @@ type pcb struct {
 	callback  chan<- *model.Output
 	consensus *consensus.Raft
 	// 存储计算方法的临时文件路径
-	tempFilePath string
-	fnName       string
+	fnName string
 }
 
 func newPT() *processTable {
@@ -47,15 +42,10 @@ func (pT *processTable) delete(pid model.Pid) {
 }
 
 // shutdown 关闭进程
-func (p *pcb) shutdown() (err error) {
-	err = p.consensus.ShutDown()
+func (p *pcb) shutdown() error {
+	err := p.consensus.ShutDown()
 	if err != nil {
-		zlog.Error("shutdown consensus failed", zap.Error(err))
-		err = errors.Join(err)
+		return err
 	}
-	//if err = os.RemoveAll(p.tempFilePath); err != nil {
-	//	zlog.Error("remove temp compute file failed", zap.Error(err))
-	//	err = errors.Join(err)
-	//}
 	return nil
 }

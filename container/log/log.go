@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	cfg "containers/config"
+	cfg "container/config"
 
 	"github.com/natefinch/lumberjack"
 	"go.uber.org/zap"

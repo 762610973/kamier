@@ -1,4 +1,4 @@
-module containers
+module container
 
 go 1.20
 

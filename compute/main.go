@@ -14,7 +14,6 @@ import (
 	"compute/server/controller"
 
 	"go.uber.org/zap"
-	"google.golang.org/grpc"
 )
 
 func init() {
@@ -28,8 +27,6 @@ func init() {
 
 func main() {
 	h := controller.RunHttpServer()
-	nodeServer := grpc.NewServer()
-	containerServer := grpc.NewServer()
 	var err error
 	go func() {
 		zlog.Info("start http server")
@@ -44,13 +41,13 @@ func main() {
 	}()
 	errCh := make(chan error, 1)
 	go func() {
-		err = controller.RunGrpcNodeServer(nodeServer)
+		err = controller.RunGrpcNodeServer()
 		if err != nil {
 			errCh <- err
 		}
 	}()
 	go func() {
-		err = controller.RunGrpcContainerServer(containerServer)
+		err = controller.RunGrpcContainerServer()
 		if err != nil {
 			errCh <- err
 		}
@@ -66,8 +63,6 @@ func main() {
 		if err = h.Shutdown(ctx); err != nil {
 			zlog.Error("graceful shutdown failed", zap.Error(err))
 		}
-		containerServer.GracefulStop()
-		nodeServer.GracefulStop()
 		db.CloseDB()
 		zlog.Info("graceful shutdown...")
 	case e := <-errCh:

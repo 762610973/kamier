@@ -11,9 +11,9 @@ message Pid {
 
 // 节点间通信请求参数
 message IpcReq{
-  Pid pid = 1;
-
-  bytes arg = 2;
+  string nodeName =1;
+  int64 serial = 2;
+  bytes arg = 3;
 }
 // 节点间通信相应
 message IpcRes {}

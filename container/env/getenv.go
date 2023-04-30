@@ -1,7 +1,7 @@
 package env
 
 import (
-	zlog "containers/log"
+	zlog "container/log"
 	"go.uber.org/zap"
 	"os"
 	"strconv"
@@ -12,7 +12,6 @@ const (
 	socketPath    = "SocketPath"
 	serial        = "Serial"
 	nodeName      = "NodeName"
-	fnName        = "FnName"
 	membersLength = "MembersLength"
 	hostIp        = "Host_IP"
 )
@@ -23,7 +22,7 @@ func GetSelfName() string {
 	return name
 }
 
-func GetSocketPath() string {
+func GetContainerAddr() string {
 	addr := os.Getenv(socketPath)
 	zlog.Info("get socket path: " + addr)
 	return addr
@@ -43,11 +42,6 @@ func GetNodeName() string {
 	name := os.Getenv(nodeName)
 	zlog.Info("get node name: " + name)
 	return name
-}
-func GetFnName() string {
-	f := os.Getenv(fnName)
-	zlog.Info("get fn name: " + f)
-	return f
 }
 
 func GetMembersLength() string {

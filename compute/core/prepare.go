@@ -29,8 +29,9 @@ func (p *prepareValue) fetchValue(step int64, pb chan value) {
 		zlog.Debug("already prepared value")
 		pb <- v
 	} else {
-		zlog.Debug("haven't prepare value")
+		zlog.Debug("haven't prepare value, so put a channel to sender list")
 		if _, ok = p.senderMap[step]; !ok {
+			zlog.Debug("sender list not exists")
 			p.senderMap[step] = make([]chan value, 0, 1)
 			p.senderMap[step] = append(p.senderMap[step], pb)
 		} else {
@@ -43,17 +44,20 @@ func (p *prepareValue) fetchValue(step int64, pb chan value) {
 func (p *prepareValue) prepareValue(step int64, v value) {
 	p.Lock()
 	defer p.Unlock()
+	zlog.Debug("prepare value......")
 	_, ok := p.preparedValue[step]
 	if !ok {
-		zlog.Debug("put value to prepare map")
+		zlog.Debug("[value] is not exists, so put value to prepare map")
 		p.preparedValue[step] = v
 	}
 	sendList, ok := p.senderMap[step]
 	if ok {
+		zlog.Debug("sender map is existed, so range list to send value")
 		for _, val := range sendList {
 			val <- v
 		}
 		delete(p.senderMap, step)
 	}
 	zlog.Debug("prepare value complete")
+
 }

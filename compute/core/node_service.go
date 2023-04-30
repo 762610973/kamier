@@ -64,8 +64,8 @@ func (c *Core) Start(_ context.Context, req *node.StartReq) (*node.StartRes, err
 // Ipc 容器内程序向共识队列中添加至,通过此方法
 func (c *Core) Ipc(_ context.Context, req *node.IpcReq) (*node.IpcRes, error) {
 	pid := model.Pid{
-		NodeName: req.Pid.NodeName,
-		Serial:   req.Pid.Serial,
+		NodeName: req.NodeName,
+		Serial:   req.Serial,
 	}
 	p, ok := c.processTable.get(pid)
 	if !ok {
@@ -86,9 +86,12 @@ func (c *Core) Fetch(_ context.Context, req *node.FetchReq) (*node.FetchRes, err
 	if ok {
 		v := make(chan value, 1)
 		p.prepared.fetchValue(req.Step, v)
-		defer zlog.Debug("fetch value success")
-		return &node.FetchRes{Res: <-v}, nil
+		zlog.Debug("waiting channel to send value")
+		res := <-v
+		zlog.Debug("wait channel to send value")
+		return &node.FetchRes{Res: res}, nil
 	} else {
+		zlog.Error("can't fetch value, pid not found")
 		return nil, errors.New("can't fetch value")
 	}
 }

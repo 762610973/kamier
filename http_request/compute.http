@@ -6,3 +6,27 @@ Content-Type: application/json
   "functionId": "2",
   "members": ["org1","org2"]
 }
+
+
+
+###
+
+# curl -X POST --location "http://10.186.155.92:1113/syncCompute"
+#    -H "Content-Type: application/json"
+#    -d "{
+#          \"functionId\": \"2\",
+#          \"members\": [\"org1\",\"org2\"]
+#        }"
+POST http://10.186.155.92:1113/syncCompute
+Content-Type: application/json
+
+{
+  "functionId": "2",
+  "members": [
+    "org1",
+    "org2"
+  ]
+}
+
+###
+

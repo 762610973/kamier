@@ -43,32 +43,25 @@ func getFunc(id string) ([2]string, error) {
 }
 
 // GenerateTempFile 根据id从storage获取计算方法,base64解码后保存在文件中,并挂载至容器内
-func GenerateTempFile(funcId string) ([2]string, error) {
+func GenerateTempFile(funcId string) (string, error) {
 	m, err := getFunc(funcId)
 	if err != nil {
-		return [2]string{}, err
+		return "", err
 	}
 	res, err := base64.StdEncoding.DecodeString(m[0])
 	if err != nil {
 		zlog.Error("base64 decode failed", zap.Error(err))
 	}
 	var tempPath string
-	err = os.Mkdir("../container/"+m[1], 0777)
-	if err != nil {
-		zlog.Error("mkdir package failed", zap.Error(err))
-	}
-	tempPath = "../containers/" + m[1] + "/" + m[1] + ".go"
-	//tempPath = "../container/exec/" + m[1] + ".go"
+	tempPath = "functions/" + m[1] + ".go"
 	file, err := os.Create(tempPath)
 	if err != nil {
 		zlog.Error("create file failed", zap.Error(err))
-		return [2]string{}, nil
+		return "", nil
 	}
 	if _, err = file.Write(res); err != nil {
 		zlog.Error("write data to temp file failed", zap.Error(err))
-		return [2]string{}, nil
+		return "", nil
 	}
-	m[0] = tempPath
-	zlog.Info("generate temp file success", zap.Any("m->", m))
-	return m, nil
+	return m[1], nil
 }

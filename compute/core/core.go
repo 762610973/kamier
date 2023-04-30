@@ -3,7 +3,6 @@ package core
 import (
 	"bytes"
 	"flag"
-	"fmt"
 	"os"
 	"os/exec"
 	"strconv"
@@ -45,6 +44,7 @@ func (c *Core) StartProcess(pid model.Pid, funcId string, members []string, call
 	defer c.lock.Unlock()
 	p := new(pcb)
 	p.callback = callback
+	p.prepared = newPreparedValue()
 	if len(members) == 1 {
 		// 只有一个成员,单节点计算,不需要建立共识,同时容器内直接执行即可
 		goto label
@@ -52,19 +52,21 @@ func (c *Core) StartProcess(pid model.Pid, funcId string, members []string, call
 		// 多节点参与计算
 		r, err := consensus.NewRaft(pid, members)
 		if err != nil {
+			zlog.Error("new raft failed", zap.Error(err))
 			startErrCh <- err
+			return
 		}
 		p.consensus = r
 		if err = p.consensus.BuildConsensus(); err != nil {
 			startErrCh <- err
+			return
 		}
 	}
 label:
 	if m, err := client.GenerateTempFile(funcId); err != nil {
 		startErrCh <- err
 	} else {
-		p.tempFilePath = m[0]
-		p.fnName = m[1]
+		p.fnName = m
 	}
 	startErrCh <- nil
 	// 将当前进程插入进程表
@@ -72,7 +74,7 @@ label:
 	go func() {
 		errorCh := make(chan error, 1)
 		c.startContainer(pid, members, errorCh)
-		timeOut := time.After(time.Second * 30)
+		timeOut := time.After(time.Second * 60)
 		select {
 		case <-timeOut:
 			zlog.Info(TimeoutErr)
@@ -86,7 +88,6 @@ label:
 			}
 		}
 	}()
-	return
 }
 
 var isRm = flag.Bool("rm", true, "执行完之后是否删除容器")
@@ -118,27 +119,26 @@ func (c *Core) startContainer(pid model.Pid, members []string, errCh chan error)
 	} else {
 		cmdArgs = []string{"run", "--network=host"}
 	}
+	fileName := p.fnName + ".go"
 	cmdArgs = append(cmdArgs,
-		"-e", "SocketPath="+cfg.Cfg.SocketPath,
+		"-e", "SocketPath="+cfg.Cfg.ContainerAddr,
 		"-e", "SelfName="+cfg.Cfg.NodeName,
 		"-e", "NodeName="+pid.NodeName,
 		"-e", "Serial="+strconv.FormatInt(pid.Serial, 10),
-		"-e", "Host_IP="+cfg.Cfg.LocalAddr,
+		//"-e", "Host_IP="+cfg.Cfg.LocalAddr,
 		"-e", "MembersLength="+strconv.Itoa(len(members)),
 		"-e", "FnName="+p.fnName,
 		// 挂载的文件
-		"-v", "../containers/:/root/containers/",
+		"-v", "../container/:/root/container/",
 		// sockets文件
-		"-v", pwd+"/socket.sock:/root/containers/socket.sock",
-		"-v", "./logs:/root/containers/logs",
-		"-w", "/root/containers/",
+		"-v", "./functions/"+fileName+":/root/container/"+fileName,
+		"-v", pwd+"/socket.sock:/root/container/socket.sock",
+		"-v", "./logs:/root/container/logs",
+		"-w", "/root/container/",
 		imageName,
-		Go, "run", ".",
-		//Go, "run", "main.go",
+		Go, "run", fileName,
 	)
 	cmd := exec.Command("podman", cmdArgs...)
-	//cmd = exec.Command("podman", "run", "-v ../container:/root/container", "-w /root/container", "kamier:1.0", "Go run main.go ")
-	fmt.Println("[podman arg...]", cmd.String())
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
@@ -185,12 +185,12 @@ func (c *Core) finish(pid model.Pid, output model.Output) error {
 	if ok {
 		if p.callback != nil {
 			p.callback <- &output
-			if err = p.shutdown(); err != nil {
-				zlog.Warn("pcb shutdown failed", zap.Error(err))
-				return err
-			}
-			return nil
 		}
+		if err = p.shutdown(); err != nil {
+			zlog.Warn("pcb shutdown failed", zap.Error(err))
+			return err
+		}
+		return nil
 	}
 	return errors.New("process not found")
 }
